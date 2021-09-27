@@ -1,6 +1,37 @@
 (in-package #:lunamech-matrix-api)
 
-(define-condition api-timeout (moonbot-condition)
+(define-condition lunamech-matrix-api-condition (error)
+  ())
+
+(define-condition api-error (lunamech-matrix-api-condition)
+  ((api-error-error
+    :accessor api-error-error
+    :initarg :api-error-error
+    :initform "default"
+    :type string)
+   (api-error-code
+    :accessor api-error-code
+    :initarg :api-error-code
+    :initform "default"
+    :type string)
+   (api-error-args
+    :accessor api-error-args
+    :initform "default"
+    :initarg :api-error-args)
+   (api-error-description
+    :accessor api-error-description
+    :initarg :api-error-description
+    :initform "default"))
+  (:report
+   (lambda (api-error stream)
+     (format stream "~&Error code: ~S~%Error value: ~S~%Description: ~S~%~A"
+             (api-error-code api-error)
+             (api-error-error api-error)
+             (api-error-description api-error)
+             (when (api-error-args api-error)
+               (format nil "Args: ~A~%" (api-error-args api-error)))))))
+
+(define-condition api-timeout (api-error)
   ((api-timeout-message
     :accessor api-timeout-message
     :initarg :api-timeout-message)
