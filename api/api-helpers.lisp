@@ -2,9 +2,6 @@
 
 (defparameter *request-type-hash* (make-hash-table))
 
-(defparameter *url* "https://matrix.scyldings.com")
-(defparameter *api* "/_matrix/client/r0/")
-
 (defparameter +content-type+ "application/json; charset=utf-8");;I will back to const
 
 (defun gen-headers (connection &optional (content-type +content-type+))

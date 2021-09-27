@@ -11,6 +11,8 @@
                #:do-urlencode)
   :pathname "api"
   :components ((:file "package")
+               (:file "classes")
+               (:file "conditions")
                (:file "api-helpers")
                (:file "user-api")
                (:file "spaces")
