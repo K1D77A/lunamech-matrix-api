@@ -14,6 +14,8 @@
                (:file "classes")
                (:file "conditions")
                (:file "api-helpers")
+               (:file "api-protocol")
+               (:file "integrations")
                (:file "user-api")
                (:file "spaces")
                (:file "sync")

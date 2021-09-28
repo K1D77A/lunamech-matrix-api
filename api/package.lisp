@@ -24,10 +24,14 @@
            #:find-module
            #:find-timer
            #:make-timer
+           #:logged-in-p
+           #:logout
+           #:url
            #:make-timers
            #:find-and-reset-timer
            #:find-types-in-rooms-timeline
            #:homeserver
+           #:api-error 
            #:same-homeserver-p
            #:moonhelp
            #:add-admin
@@ -76,6 +80,7 @@
            #:admin-force-user-to-join-room
            #:admin-whois
            #:admins
+           #:password-login
            #:aliases
            #:add-new-alias
            #:already-processed
