@@ -8,6 +8,7 @@
                #:drakma
                #:jonathan
                #:str
+               #:closer-mop
                #:do-urlencode)
   :pathname "api"
   :components ((:file "package")
@@ -15,7 +16,7 @@
                (:file "conditions")
                (:file "api-helpers")
                (:file "api-protocol")
-               (:file "integrations")
+               (:file "integration")
                (:file "user-api")
                (:file "spaces")
                (:file "sync")

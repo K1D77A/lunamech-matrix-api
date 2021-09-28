@@ -38,7 +38,6 @@ anything else evaluates to (api connection)"))
 (defun gen-admin-url (connection)
   (list (url connection)))
 
-
 (defun plist-to-get-params (plist)
   "Loops over PLIST and creates a single string from the keys and vals. 
 Keys are displayed with the following format string ~A= and vals ~A&. Vals are 
