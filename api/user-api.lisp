@@ -1,7 +1,5 @@
 (in-package #:lunamech-matrix-api)
 
-(defun url-e (url)
-  (do-urlencode:urlencode url))
 
 (defun password-login-plist (connection)
   (let ((idp (slot-boundp connection  'device-id))
