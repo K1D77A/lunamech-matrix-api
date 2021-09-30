@@ -8,6 +8,8 @@
                #:drakma
                #:jonathan
                #:str
+               #:cl-json
+               #:reader
                #:closer-mop
                #:do-urlencode)
   :pathname "api"

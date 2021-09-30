@@ -16,7 +16,8 @@ follow a different scheme.
     :initarg :name)
    (name->json
     :accessor name->json 
-    :initarg :name->json)
+    :initarg :name->json
+    :initform nil)
    (category 
     :accessor category
     :initarg :category
@@ -151,14 +152,11 @@ follow a different scheme.
   (with-slots (string-constructor endpoint required-slots special-slot)
       class
     (multiple-value-bind (fun slots)
-        (compose-string-into-lambda class (first endpoint))
+        (compose-string-into-lambda class (in-list endpoint))
       (setf string-constructor fun
             required-slots slots
             special-slot (find-special-slot class))
       (call-next-method))))
-
-(defmethod c2mop:compute-slots :after ((class api-call))
-  (add-to-json-method class))
 
 (defmethod find-special-slot ((class api-call))
   (with-slots (special-slot specialp)
@@ -177,20 +175,17 @@ follow a different scheme.
     :reader connection
     :initarg :connection)
    (result
-    :reader result))
+    :accessor result))
   (:metaclass api-call))
 
 (defun url-e (url)
   (do-urlencode:urlencode url))
 
-(defmethod initialize-instance :after ((class api-call) &rest initargs)
-  nil
-  )
 
 (defmethod initialize-instance :after ((class api) &rest initargs)
   (with-slots (string-constructor)
       (class-of class)
-    (c2mop:set-funcallable-instance-function class string-constructor)))
+    (c2mop:set-funcallable-instance-function class (lambda () (funcall #'call-api class)))))
 ;;(call-next-method)))
 
 (defun compose-string-into-lambda (class string)
@@ -213,8 +208,12 @@ string returned."
                                         (find sym class-slots
                                               :key #'c2mop:slot-definition-name))
                                       lambda-list)))
+             (encoders (loop :for slot :in filtered-slots
+                             :collect (list :name (c2mop:slot-definition-name slot)
+                                            :encoder (slot-value slot 'encoder))))
              (optional-slots (remove-if #'requiredp filtered-slots))
-             (required-slots (remove-if-not #'requiredp filtered-slots))
+             (required-slots (remove-if-not #'requiredp filtered-slots
+                                            :key ))
              (o-names (mapcar #'c2mop:slot-definition-name optional-slots))
              (r-names (mapcar #'c2mop:slot-definition-name required-slots))
              (final-lambda-list (append r-names (if o-names
@@ -245,6 +244,7 @@ string returned."
     :accessor event-type
     :category :send
     :in-url-p t
+    :encoder nil
     :initarg :event-type
     :encoder nil)
    (body 
@@ -256,6 +256,7 @@ string returned."
     :accessor txn
     :category :send
     :requiredp nil
+    :encoder nil
     :in-url-p t))
   (:metaclass api-call)
   (:endpoint "rooms/:room-id/send/:event-type/:txn")
@@ -264,25 +265,41 @@ string returned."
   (:rate-limited-p nil)
   (:specialp t))
 
-(defclass login (api)
-  ((login-type
-    :accessor login-type
-    :category :send
-    :initform "m.login.password"
-    :name->json :LOGIN
-    :requiredp t)
-   (identifier
-    :accessor identifier
-    :initarg :identifier
-    :category :send)
-   (password
-    :accessor password
-    :initarg :password
-    :category :send))
-  (:metaclass api-call)
-  (:endpoint "login")
-  (:request-type :post)
-  (:requires-auth-p nil))
+(defmacro defapi (name slots &rest class-options)
+  `(progn (defclass ,name (api)
+            ,slots
+            ,@class-options)))
+
+(defapi login 
+        ((login-type
+          :accessor login-type
+          :category :send
+          :initform "m.login.password"
+          :name->json :type
+          :requiredp t)
+         (identifier
+          :accessor identifier
+          :initarg :identifier
+          :category :send)
+         (password
+          :accessor password
+          :initarg :password
+          :category :send)
+         (device-id
+          :accessor device-id
+          :initarg :device-id
+          :category :send
+          :requiredp nil))
+        (:metaclass api-call)
+        (:endpoint "login")
+        (:request-type :post)
+        (:requires-auth-p nil))
+
+(defapi logout
+        ()
+        (:metaclass api-call)
+        (:rate-limited-p nil)
+        (:endpoint "logout"))
 
 (defmethod validate-slot-for-sending ((api api) slot)
   (with-accessors ((requiredp requiredp))
@@ -309,53 +326,42 @@ string returned."
   (remove-unbound-slots api (validate-slots-for-sending api (slots-to-send api))))
 
 (defmethod slot->json ((api api) slot)
-  (with-slots (name->json)
-      slot
-    (let ((name (c2mop:slot-definition-name slot)))
-      `(progn (print "boog")
-              (validate-slot-for-sending api slot)
-              (when (slot-boundp api ',name)
-                (jojo:write-key-value (if (slot-boundp slot 'name->json)
-                                          name->json
-                                          name)
-                                      (slot-value api name)))))))
+  (let ((name (c2mop:slot-definition-name slot)))
+    (cl-json:encode-object-member 
+     (or (and (slot-boundp slot 'name->json)(slot-value slot 'name->json))
+         (str:snake-case (string name)))
+     (slot-value api name))))
 
-(defmethod generate-jojo-body ((api api-slot))
-  (let ((slots (c2mop:class-direct-slots api)))
-    `(jojo:with-object
-       ,@(mapcar (lambda (slot) (slot->json api slot))
-                 slots))))
+(defmethod to-json ((api api))
+  (let* ((slots (slots-to-send-and-validated api))
+         (stream (make-string-output-stream))
+         (cl-json:*json-output* stream))
+    (cl-json:with-object ()
+      (mapc (lambda (s) (slot->json api s)) slots))
+    (get-output-stream-string stream)))
 
-(defun add-to-json-method (object)
-  (let* ((gf (c2mop:ensure-generic-function 'jojo:%to-json))
-         (gfc (c2mop:generic-function-method-class gf)))
-    (print (class-of object))
-    (print 'doo)
-    (add-method gf 
-                (apply #'make-instance gfc 
-                       :function (compile nil
-                                          (lambda (object) (generate-jojo-body object)))
-                       :specializers (list (class-of object))
-                       :qualifiers ()
-                       :lambda-list '((obj))))))
+(defun in-list (e)
+  (if (listp e)
+      (first e)
+      e))
 
 (defmethod string-constructor ((api api))
   (string-constructor (class-of api)))
 
 (defmethod request-type ((api api))
-  (request-type (class-of api)))
+  (in-list (request-type (class-of api))))
 
 (defmethod rate-limited-p ((api api))
-  (first (rate-limited-p (class-of api))))
+  (in-list (rate-limited-p (class-of api))))
 
 (defmethod api ((api api))
-  (api (class-of api)))
+  (in-list (api (class-of api))))
 
 (defmethod content-type ((api api))
   (content-type (class-of api)))
 
 (defmethod requires-auth-p ((api api))
-  (first (requires-auth-p (class-of api))))
+  (in-list (requires-auth-p (class-of api))))
 
 (defmethod determine-request-fun ((key (eql :post)))
   #'dexador:post)
@@ -364,7 +370,7 @@ string returned."
   #'dexador:get)
 
 (defmethod specialp ((api api))
-  (first (specialp (class-of api))))
+  (in-list (specialp (class-of api))))
 
 (defmethod required-slots ((api api))
   (required-slots (class-of api)))
@@ -391,8 +397,8 @@ string returned."
 (defmethod generate-headers ((api api))
   (cons (cons "Content-Type"  (generate-content-type api))
         (if (requires-auth-p api)
-            (cons "Authorization" (generate-authorization api))
-            nil)))
+            (cons (cons "Authorization" (generate-authorization api))
+                  nil))))
 
 (defmethod generate-body%special ((api api))
   (with-accessors ((special-slot special-slot))
@@ -401,29 +407,34 @@ string returned."
       (error "You have declared a slot special but it is not bound..."))
     (jojo:to-json (slot-value api special-slot))))
 
-;; (defmethod generate-body%normal ((api api))
-;;   (c2mop:generic-function-argument-precedence-order)
-
+(defmethod generate-body%normal ((api api))
+  (to-json api))
 
 (defmethod generate-body ((api api))
   (if (specialp api)
       (generate-body%special api)
       (generate-body%normal api)))
 
-;; (defmethod call-api ((api api))
-;;   (with-slots ((string-constructor string-constructor)
-;;                (request-type request-type)
-;;                (connection connection)
-;;       api
-;;     (let* ((end (apply string-constructor (values-for-required api)))
-;;            (fun (determine-request-fun request-type))
-;;            (api-string (api api)))
-;;       (with-accessors ((url url)
-;;                        (auth auth))
-;;           connection
-;;         (let ((headers (generate-headers api)))
+(defmethod call-api ((api api))
+  (symbol-macrolet ((string-constructor (string-constructor api))
+                    (request-type (request-type api))
+                    (connection (connection api)))
+    (let* ((end (apply string-constructor (values-for-required api)))
+           (fun (determine-request-fun request-type))
+           (api-string (api api)))
+      (with-accessors ((url url)
+                       (auth auth))
+          connection
+        (let ((headers (generate-headers api))
+              (content (to-json api))
+              (url (concatenate 'string url api-string end)))
+          (let ((res
+                  (execute-api-call api fun url 
+                                    `(:headers ,headers :content ,content
+                                      :use-connection-pool nil))))
+            (setf (result api) (jojo:parse res))
+            api))))))
 
-
-;;     end))
-
-
+(defmethod execute-api-call ((api api) fun url args-plist)
+  (with-captured-dex-error
+    (apply fun url args-plist)))
