@@ -201,6 +201,16 @@ string returned."
                                                (intern (string-upcase (subseq string 1)))
                                                string))
                                          split))
+             (syms-assoc-encoders (mapcar (lambda (entry)
+                                            (if (stringp entry)
+                                                `(list ,entry)
+                                                (let ((slot
+                                                        (find entry class-slots
+                                                              :key
+                                                              #'c2mop:slot-definition-name)))
+                                                  `(cons ,entry
+                                                         ,(encoder slot)))))
+                                          replaced-with-syms))
              (lambda-list (remove-if-not #'symbolp replaced-with-syms))
              (filtered-slots (remove-if
                               #'null
@@ -208,12 +218,8 @@ string returned."
                                         (find sym class-slots
                                               :key #'c2mop:slot-definition-name))
                                       lambda-list)))
-             (encoders (loop :for slot :in filtered-slots
-                             :collect (list :name (c2mop:slot-definition-name slot)
-                                            :encoder (slot-value slot 'encoder))))
              (optional-slots (remove-if #'requiredp filtered-slots))
-             (required-slots (remove-if-not #'requiredp filtered-slots
-                                            :key ))
+             (required-slots (remove-if-not #'requiredp filtered-slots))
              (o-names (mapcar #'c2mop:slot-definition-name optional-slots))
              (r-names (mapcar #'c2mop:slot-definition-name required-slots))
              (final-lambda-list (append r-names (if o-names
@@ -221,15 +227,20 @@ string returned."
                                                     nil)
                                         (mapcar (lambda (name)
                                                   (list name nil))
-                                                o-names))))
-        (print lambda-list)
-        (print filtered-slots )
-        (print replaced-with-syms)
+                                                o-names))))        
         (values     
          (compile nil
                   `(lambda ,final-lambda-list
                      (format nil "~{~A~^/~}"
-                             (remove-if #'null (list ,@replaced-with-syms)))))
+                             (mapcar (lambda (list)
+                                       (let ((str-or-sym (car list))
+                                             (encoder? (cdr list)))
+                                         (if encoder?
+                                             (progn (print encoder?)
+                                                    (funcall encoder? str-or-sym))
+                                             str-or-sym)))
+                                     (remove-if #'null (list ,@syms-assoc-encoders)
+                                                :key #'car)))))
          lambda-list))
       (lambda ()
         string)))
@@ -238,13 +249,11 @@ string returned."
   ((room-id
     :category :send
     :initarg :room-id
-    :encoder #'url-e
     :in-url-p t)
    (event-type
     :accessor event-type
     :category :send
     :in-url-p t
-    :encoder nil
     :initarg :event-type
     :encoder nil)
    (body 
