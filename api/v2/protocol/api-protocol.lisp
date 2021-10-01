@@ -1,4 +1,4 @@
-(in-package #:lunamech-matrix-api)
+(in-package #:lunamech-matrix-api/v2)
 #||
 This file contains the code for a metaobject protocol used for 
 specifying the matrix API calls.
@@ -10,85 +10,7 @@ follow a different scheme.
 
 ;;;;this file contains a MOP for webhooks
 
-(defclass api-slot (c2mop:slot-definition)
-  ((name
-    :accessor name
-    :initarg :name)
-   (name->json
-    :accessor name->json 
-    :initarg :name->json
-    :initform nil)
-   (category 
-    :accessor category
-    :initarg :category
-    :initform nil)
-   (requiredp 
-    :accessor requiredp
-    :initarg :requiredp
-    :initform t))
-  (:documentation "A toplevel class used to define new webhooks."))
 
-(defclass api-send-slot (api-slot)
-  ((encoder
-    :accessor encoder
-    :initarg :encoder
-    :initform #'url-e
-    :documentation "if this slot is being encoded into the URL then uses this function.")
-   (in-url-p
-    :accessor in-url-p
-    :initarg :in-url-p
-    :initform nil)
-   (category
-    :initform :send)
-   (specialp
-    :reader specialp
-    :initarg :specialp
-    :initform nil)))
-
-(defclass api-send-slot-special (api-send-slot)
-  ((specialp
-    :initform t)))
-
-(defclass api-call (c2mop:funcallable-standard-class)
-  ((connection
-    :accessor connection
-    :initarg :connection)
-   (endpoint
-    :accessor endpoint
-    :initarg :endpoint
-    :documentation "A URL with :<slot-name> within where the slot value is encoded.")
-   (api
-    :accessor api
-    :initarg :api
-    :initform "/_matrix/client/r0/")
-   (rate-limited-p
-    :accessor rate-limited-p
-    :initarg :rate-limited-p
-    :initform t)
-   (requires-auth-p
-    :accessor requires-auth-p
-    :initarg :requires-auth-p
-    :initform t)
-   (string-constructor
-    :accessor string-constructor
-    :initform nil)
-   (request-type
-    :reader request-type
-    :initarg :request-type
-    :initform :post)
-   (required-slots 
-    :accessor required-slots
-    :initform nil)
-   (content-type
-    :reader content-type
-    :initform "application/json; charset=utf-8")
-   (specialp
-    :reader specialp
-    :initarg :specialp
-    :initform nil)
-   (special-slot
-    :reader special-slot
-    :initform nil)))
 
 (defclass api-slot-direct (api-slot c2mop:standard-direct-slot-definition)
   ())
@@ -167,8 +89,14 @@ follow a different scheme.
                                           slots))))
         (if slot
             (c2mop:slot-definition-name slot)
-            (error
-             "Class is set to special but you have no slots that are declared special"))))))
+          (error 'set-special
+                 :message "Class is set to special but you have no slots that are declared special"))))))
+
+
+
+(defun url-e (url)
+  (do-urlencode:urlencode url))
+
 
 (defclass api ()
   ((connection
@@ -176,10 +104,8 @@ follow a different scheme.
     :initarg :connection)
    (result
     :accessor result))
-  (:metaclass api-call))
-
-(defun url-e (url)
-  (do-urlencode:urlencode url))
+  (:metaclass api-call)
+  (:documentation "The top level class for all API call objects."))
 
 
 (defmethod initialize-instance :after ((class api) &rest initargs)
@@ -188,133 +114,97 @@ follow a different scheme.
     (c2mop:set-funcallable-instance-function class (lambda () (funcall #'call-api class)))))
 ;;(call-next-method)))
 
+;;;code for generating the string constructor function
+
+(defun %find-encoders-for-syms (sym-string-list slots)
+  "Maps over SYM-STRING-LIST which is a mix of symbols and strings, if its a string
+returns `(list ,string) if it is a symbol then looks for the slot with the name 
+,entry and the returns `(cons ,entry ,(encoder slot)), this final accumulated list is 
+returned."
+  (mapcar (lambda (entry)
+            (if (stringp entry)
+                `(list ,entry)
+                (let ((slot (find entry slots :key #'c2mop:slot-definition-name)))
+                  `(cons ,entry ,(encoder slot)))))
+          sym-string-list))
+
+(defun %upcase-and-intern-starting-with (start list)
+  "If a string in LIST starts with START then interns and upcases it with START removed.
+START should be a string of len 1."
+  (mapcar (lambda (string)
+            (if (str:starts-with-p start string)
+                (intern (string-upcase (subseq string 1)))
+                string))
+          list))
+
+(defun %filter-syms-not-assoc-with-slots (list-of-syms slots)
+  "Removes symbols from LIST-OF-SYMS that do not have associated names in SLOTS."
+  (remove-if #'null
+             (mapcar (lambda (sym) (find sym slots :key #'c2mop:slot-definition-name))
+                     list-of-syms)))
+
+(defun %construct-lambda-list (required-vars optional-vars)
+  "Constructs a lambda list from the two lists of symbols REQUIRED-VARS and OPTIONAL-VARS."
+  (append required-vars (if optional-vars '(&optional) nil)
+          (mapcar (lambda (name)
+                    (list name nil))
+                  optional-vars)))
+
 (defun compose-string-into-lambda (class string)
   "Takes a string like 'foo/:bar/quux and returns a function with N arguments where 
 N is the number of words prefixed with :, so in the example it would be a function with 
 one argument bar. When executed with this argument :bar would be replaced and a new 
-string returned."
-  (if (some #'in-url-p (c2mop:class-direct-slots class))
-      (let* ((split (str:split #\/ string))
-             (class-slots (c2mop:class-direct-slots class))
-             (replaced-with-syms (mapcar (lambda (string)
-                                           (if (str:starts-with-p ":" string)
-                                               (intern (string-upcase (subseq string 1)))
-                                               string))
-                                         split))
-             (syms-assoc-encoders (mapcar (lambda (entry)
-                                            (if (stringp entry)
-                                                `(list ,entry)
-                                                (let ((slot
-                                                        (find entry class-slots
-                                                              :key
-                                                              #'c2mop:slot-definition-name)))
-                                                  `(cons ,entry
-                                                         ,(encoder slot)))))
-                                          replaced-with-syms))
-             (lambda-list (remove-if-not #'symbolp replaced-with-syms))
-             (filtered-slots (remove-if
-                              #'null
-                              (mapcar (lambda (sym)
-                                        (find sym class-slots
-                                              :key #'c2mop:slot-definition-name))
-                                      lambda-list)))
-             (optional-slots (remove-if #'requiredp filtered-slots))
-             (required-slots (remove-if-not #'requiredp filtered-slots))
-             (o-names (mapcar #'c2mop:slot-definition-name optional-slots))
-             (r-names (mapcar #'c2mop:slot-definition-name required-slots))
-             (final-lambda-list (append r-names (if o-names
-                                                    '(&optional)
-                                                    nil)
-                                        (mapcar (lambda (name)
-                                                  (list name nil))
-                                                o-names))))        
-        (values     
-         (compile nil
-                  `(lambda ,final-lambda-list
-                     (format nil "~{~A~^/~}"
-                             (mapcar (lambda (list)
-                                       (let ((str-or-sym (car list))
-                                             (encoder? (cdr list)))
-                                         (if encoder?
-                                             (progn (print encoder?)
-                                                    (funcall encoder? str-or-sym))
-                                             str-or-sym)))
-                                     (remove-if #'null (list ,@syms-assoc-encoders)
-                                                :key #'car)))))
-         lambda-list))
-      (lambda ()
-        string)))
+string returned. Checks the slot related to the : argument to see if there is an associated 
+encoder, if there is then it encodes that argument with that single argument function. 
+Also checks if the argument is optional, if it is optional then it is added as an 
+&optional argument to the returned function with a default argument of nil, this is 
+removed if no value is added."
+  (flet ((slot-name (slot) (c2mop:slot-definition-name slot)))
+    (let ((class-slots (c2mop:class-direct-slots class)))
+      (if (some #'in-url-p class-slots)
+          (let* ((split (str:split #\/ string))
+                 (replaced-with-syms (%upcase-and-intern-starting-with ":" split))
+                 (syms-assoc-encoders (%find-encoders-for-syms replaced-with-syms
+                                                               class-slots))
+                 (lambda-list (remove-if-not #'symbolp replaced-with-syms))
+                 (filtered-slots (%filter-syms-not-assoc-with-slots lambda-list class-slots))
+                 (optional-slots (remove-if #'requiredp filtered-slots))
+                 (required-slots (remove-if-not #'requiredp filtered-slots))
+                 (o-names (mapcar #'slot-name optional-slots))
+                 (r-names (mapcar #'slot-name required-slots))
+                 (final-lambda-list (%construct-lambda-list r-names o-names)))       
+            (values     
+             (compile nil
+                      `(lambda ,final-lambda-list
+                         (format nil "~{~A~^/~}"
+                                 (mapcar (lambda (list)
+                                           (let ((str-or-sym (car list))
+                                                 (encoder? (cdr list)))
+                                             (if encoder?
+                                                 (funcall encoder? str-or-sym)
+                                                 str-or-sym)))
+                                         (remove-if #'null (list ,@syms-assoc-encoders)
+                                                    :key #'car)))))
+             lambda-list))
+          (lambda ()
+            string)))))
 
-(defclass message-room (api)
-  ((room-id
-    :category :send
-    :initarg :room-id
-    :in-url-p t)
-   (event-type
-    :accessor event-type
-    :category :send
-    :in-url-p t
-    :initarg :event-type
-    :encoder nil)
-   (body 
-    :accessor body
-    :initarg :body
-    :category :send
-    :specialp t)
-   (txn
-    :accessor txn
-    :category :send
-    :requiredp nil
-    :encoder nil
-    :in-url-p t))
-  (:metaclass api-call)
-  (:endpoint "rooms/:room-id/send/:event-type/:txn")
-  (:request-type :post)
-  (:requires-auth-p nil)
-  (:rate-limited-p nil)
-  (:specialp t))
 
-(defmacro defapi (name slots &rest class-options)
+(defmacro defapi (name (endpoint request-type) slots &rest class-options)
   `(progn (defclass ,name (api)
             ,slots
-            ,@class-options)))
-
-(defapi login 
-        ((login-type
-          :accessor login-type
-          :category :send
-          :initform "m.login.password"
-          :name->json :type
-          :requiredp t)
-         (identifier
-          :accessor identifier
-          :initarg :identifier
-          :category :send)
-         (password
-          :accessor password
-          :initarg :password
-          :category :send)
-         (device-id
-          :accessor device-id
-          :initarg :device-id
-          :category :send
-          :requiredp nil))
-        (:metaclass api-call)
-        (:endpoint "login")
-        (:request-type :post)
-        (:requires-auth-p nil))
-
-(defapi logout
-        ()
-        (:metaclass api-call)
-        (:rate-limited-p nil)
-        (:endpoint "logout"))
+            ,@(append `((:metaclass api-call)
+                        (:request-type ,request-type)
+                        (:endpoint ,endpoint))
+               class-options))))
 
 (defmethod validate-slot-for-sending ((api api) slot)
   (with-accessors ((requiredp requiredp))
       slot
     (when (and requiredp (not (slot-boundp api (c2mop:slot-definition-name slot))))
-      (error "Trying to send a request but missing data from required slot."))))
+      (error 'missing-required-data
+             :slot slot
+             :message "Trying to send a request but missing data from required slot."))))
 
 (defmethod slots-to-send ((api api))
   (let ((slots (c2mop:class-direct-slots (class-of api))))
@@ -404,7 +294,7 @@ string returned."
   (content-type api))
 
 (defmethod generate-headers ((api api))
-  (cons (cons "Content-Type"  (generate-content-type api))
+  (cons (cons "Content-Type" (generate-content-type api))
         (if (requires-auth-p api)
             (cons (cons "Authorization" (generate-authorization api))
                   nil))))
@@ -413,7 +303,8 @@ string returned."
   (with-accessors ((special-slot special-slot))
       api 
     (unless (slot-boundp api special-slot)
-      (error "You have declared a slot special but it is not bound..."))
+      (error 'special-slot-is-not-bound 
+             :message "You have declared a slot special but it is not bound..."))
     (jojo:to-json (slot-value api special-slot))))
 
 (defmethod generate-body%normal ((api api))

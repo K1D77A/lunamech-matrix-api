@@ -2,7 +2,7 @@
   :description "An implementation of the Matrix API taken from LunaMech see https://lunamech.com"
   :author "K1D77A"
   :license  "MIT"
-  :version "0.0.1"
+  :version "0.0.2"
   :serial t
   :depends-on (#:dexador
                #:drakma
@@ -17,11 +17,23 @@
                (:file "classes")
                (:file "conditions")
                (:file "api-helpers")
-               (:file "api-protocol")
                (:file "integration")
                (:file "user-api")
                (:file "spaces")
                (:file "sync")
                (:file "admin-api")
-               (:file "events")))
+               (:file "events")
+               (:module "v2"
+                :description "Version 2 of the API library."
+                :serial t
+                :components ((:file "package")
+                             (:module "protocol"
+                              :description "The MOP protocol"
+                              :serial t
+                              :components ((:file "classes")
+                                           (:file "conditions")
+                                           (:file "api-protocol")))
+                             (:file "classes")
+                             (:file "conditions")
+                             (:file "user-api")))))
 
