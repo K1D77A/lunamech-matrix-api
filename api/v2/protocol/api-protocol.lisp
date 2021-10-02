@@ -49,23 +49,26 @@ follow a different scheme.
                                       (metaclass standard-class))
   t)
 
+(defmethod initialize-instance :after ((class api-slot) &rest initargs)
+  (validate-slot class))
+
 (defmethod c2mop:effective-slot-definition-class ((class api-call) &rest initargs)
   (destructuring-bind (&key category specialp &allow-other-keys)
       initargs
-    (find-class (cond ((eq category :send)
-                       (if specialp
-                           'api-send-special-effective
-                           'api-send-effective))
-                      (t 'api-slot-effective)))))
+    (find-class (if (and category (not (eq category :send)))
+                    'api-slot-effective
+                    (if specialp
+                        'api-send-special-effective
+                        'api-send-effective)))))
 
 (defmethod c2mop:direct-slot-definition-class ((class api-call) &rest initargs)
   (destructuring-bind (&key category specialp &allow-other-keys)
       initargs
-    (find-class (cond ((eq category :send)
-                       (if specialp
-                           'api-send-special-direct
-                           'api-send-direct))
-                      (t 'api-slot-direct)))))
+    (find-class (if (and category (not (eq category :send)))
+                    'api-slot-direct
+                    (if specialp
+                        'api-send-special-direct
+                        'api-send-direct)))))
 
 (defmethod c2mop:compute-effective-slot-definition ((class api-call) name dslots)
   (call-next-method))
@@ -83,14 +86,14 @@ follow a different scheme.
 (defmethod find-special-slot ((class api-call))
   (with-slots (special-slot specialp)
       class
-    (when (first specialp)
+    (when (in-list (specialp class))
       (let* ((slots (c2mop:class-direct-slots class))
              (slot (first (remove-if-not  (lambda (slot) (typep slot 'api-send-special-direct))
                                           slots))))
         (if slot
             (c2mop:slot-definition-name slot)
-          (error 'set-special
-                 :message "Class is set to special but you have no slots that are declared special"))))))
+            (error 'set-special
+                   :message "Class is set to special but you have no slots that are declared special"))))))
 
 
 
@@ -101,21 +104,44 @@ follow a different scheme.
 (defclass api ()
   ((connection
     :reader connection
-    :initarg :connection)
+    :initarg :connection
+    :type connection
+    :category :receive
+    :requiredp nil)
    (result
-    :accessor result))
+    :accessor result
+    :category :receive
+    :category nil
+    :requiredp nil))
   (:metaclass api-call)
   (:documentation "The top level class for all API call objects."))
 
+(defclass %post (api)
+  ()
+  (:metaclass api-call))
+
+(defclass %get (api)
+  ()
+  (:metaclass api-call))
+
+(defclass %delete (api)
+  ()
+  (:metaclass api-call))
+
+(defclass %put (api)
+  ()
+  (:metaclass api-call))
 
 (defmethod initialize-instance :after ((class api) &rest initargs)
+  (handler-case (connection class)
+    (condition (c)
+      (error 'connection-unbound :message "Connection is unbound.")))
   (with-slots (string-constructor)
       (class-of class)
     (c2mop:set-funcallable-instance-function class (lambda () (funcall #'call-api class)))))
 ;;(call-next-method)))
 
 ;;;code for generating the string constructor function
-
 (defun %find-encoders-for-syms (sym-string-list slots)
   "Maps over SYM-STRING-LIST which is a mix of symbols and strings, if its a string
 returns `(list ,string) if it is a symbol then looks for the slot with the name 
@@ -190,13 +216,25 @@ removed if no value is added."
             string)))))
 
 
-(defmacro defapi (name (endpoint request-type) slots &rest class-options)
-  `(progn (defclass ,name (api)
+(defmacro defapi (name (endpoint request-class metaclass) docstring slots &rest class-options)
+  `(progn (defclass ,name (,request-class)
             ,slots
-            ,@(append `((:metaclass api-call)
-                        (:request-type ,request-type)
-                        (:endpoint ,endpoint))
+            ,@(append `((:metaclass ,metaclass)                        
+                        (:endpoint ,endpoint)
+                        (:documentation ,docstring))
                class-options))))
+
+(defmacro defapi%post (name (endpoint) docstring slots &rest class-options)
+  `(defapi ,name (,endpoint %post api-call%post) ,docstring ,slots ,@class-options))
+
+(defmacro defapi%get (name (endpoint) docstring slots &rest class-options)
+  `(defapi ,name (,endpoint %get api-call%get)  ,docstring ,slots ,@class-options))
+
+(defmacro defapi%put (name (endpoint) docstring slots &rest class-options)
+  `(defapi ,name (,endpoint %put api-call%put) ,docstring ,slots ,@class-options))
+
+(defmacro defapi%delete (name (endpoint) docstring slots &rest class-options)
+  `(defapi ,name (,endpoint %delete api-call%delete) ,docstring ,slots ,@class-options))
 
 (defmethod validate-slot-for-sending ((api api) slot)
   (with-accessors ((requiredp requiredp))
@@ -209,7 +247,9 @@ removed if no value is added."
 (defmethod slots-to-send ((api api))
   (let ((slots (c2mop:class-direct-slots (class-of api))))
     (remove-if-not (lambda (slot)
-                     (eq (category slot) :send))
+                     (and (eq (category slot) :send)
+                          (not (query-param-p slot))
+                          (not (in-url-p slot))))
                    slots)))
 
 (defmethod validate-slots-for-sending ((api api) slots-to-send)
@@ -262,11 +302,8 @@ removed if no value is added."
 (defmethod requires-auth-p ((api api))
   (in-list (requires-auth-p (class-of api))))
 
-(defmethod determine-request-fun ((key (eql :post)))
-  #'dexador:post)
-
-(defmethod determine-request-fun ((key (eql :get)))
-  #'dexador:get)
+(defmethod request-fun ((api api))
+  (in-list (request-fun (class-of api))))
 
 (defmethod specialp ((api api))
   (in-list (specialp (class-of api))))
@@ -293,7 +330,7 @@ removed if no value is added."
 (defmethod generate-content-type ((api api))
   (content-type api))
 
-(defmethod generate-headers ((api api))
+(defmethod generate-authorization-headers ((api api))
   (cons (cons "Content-Type" (generate-content-type api))
         (if (requires-auth-p api)
             (cons (cons "Authorization" (generate-authorization api))
@@ -305,7 +342,9 @@ removed if no value is added."
     (unless (slot-boundp api special-slot)
       (error 'special-slot-is-not-bound 
              :message "You have declared a slot special but it is not bound..."))
-    (jojo:to-json (slot-value api special-slot))))
+    (jojo:to-json (if (slot-boundp api special-slot)
+                      (slot-value api special-slot)
+                      "Special slot has no value"))))
 
 (defmethod generate-body%normal ((api api))
   (to-json api))
@@ -315,26 +354,106 @@ removed if no value is added."
       (generate-body%special api)
       (generate-body%normal api)))
 
+(defmethod generate-header-list ((api api) content)
+  (let ((auth (generate-authorization-headers api)))
+    `(:headers ,auth :content content :use-connection-pool nil)))
+
+(defmethod generate-header-list ((api %get) content)
+  (declare (ignore content))
+  (let ((auth (generate-authorization-headers api)))
+    `(:headers ,auth :use-connection-pool nil)))
+
+(defmethod all-query-param-slots (slots)
+  (remove-if-not #'query-param-p slots))
+
+(defmethod bound-query-param-slots ((api api))
+  (let ((slots (all-query-param-slots (c2mop:class-direct-slots (class-of api)))))
+    (remove-if-not (lambda (slot) (slot-boundp api (c2mop:slot-definition-name slot))) slots)))
+
+(defmethod query-param-slot->string ((api api) slot)
+  (with-accessors ((name->json name->json))
+      slot
+    (let ((name  (c2mop:slot-definition-name slot)))
+      (format nil "~A=~A" (if name->json name->json name)
+              (slot-value api name)))))
+
+(defmethod query-param-slots->string ((api api) slots)
+  (let ((strings (mapcar (lambda (slot) (query-param-slot->string api slot)) slots)))
+    (format nil "?~{~A~^&~}" strings)))
+
+(defmethod generate-url ((api api))
+  (let ((end (apply (string-constructor api) (values-for-required api)))
+        (query-slots (bound-query-param-slots api)))
+    (concatenate 'string (url (connection api)) (api api) end
+                 (if query-slots
+                     (query-param-slots->string api query-slots)
+                     ""))))
+
 (defmethod call-api ((api api))
-  (symbol-macrolet ((string-constructor (string-constructor api))
-                    (request-type (request-type api))
+  (symbol-macrolet ((fun (request-fun api))
                     (connection (connection api)))
-    (let* ((end (apply string-constructor (values-for-required api)))
-           (fun (determine-request-fun request-type))
-           (api-string (api api)))
-      (with-accessors ((url url)
-                       (auth auth))
-          connection
-        (let ((headers (generate-headers api))
-              (content (to-json api))
-              (url (concatenate 'string url api-string end)))
-          (let ((res
-                  (execute-api-call api fun url 
-                                    `(:headers ,headers :content ,content
-                                      :use-connection-pool nil))))
-            (setf (result api) (jojo:parse res))
-            api))))))
+    (with-accessors ((url url)
+                     (auth auth))
+        connection
+      (let ((url (generate-url api))
+            (header-list (generate-header-list api (to-json api))))
+        (setf (result api) (jojo:parse (execute-api-call api fun url header-list)))
+        (values (result api) api)))))
+
+(defmacro with-captured-dex-error (&body body)
+  "Catches any conditions signalled by dex and converts the response into a 
+special condition defined in src/classes.lisp and signals."
+  (alexandria:with-gensyms (condition)
+    `(labels ((try-again-restart (fun)
+                (restart-case
+                    (funcall fun)
+                  (try-again ()
+                    :report "Try again?"
+                    (sleep 3)
+                    (try-again-restart fun)))))
+       (let ((fun
+               (lambda ()
+                 (handler-case
+                     (locally (bt:with-timeout (30)
+                                ,@body))
+                   (sb-ext:timeout (,condition)
+                     (error 'api-timeout :api-timeout-message "Connection broken"
+                                         :api-timeout-condition ,condition))
+                   (usocket:socket-condition (,condition)
+                     (error 'api-no-connection :api-timeout-message "No network"
+                                               :api-timeout-condition ,condition))
+                   (condition (,condition);;total catchall oh well
+                     (handler-case 
+                         (signal-condition-from-response
+                          (jojo:parse (dexador.error:response-body ,condition)))
+                       (jojo:<jonathan-error> (,condition)
+                         (error 'api-no-connection
+                                ;;if the server is down then this will end up
+                                ;;returning html not json
+                                :api-timeout-message "Server probably down"
+                                :api-timeout-condition ,condition))))))))
+         (try-again-restart fun)))))
+
+
+(defmethod slots-still-missing ((api api))
+  (let* ((slots (c2mop:class-direct-slots (class-of api)))
+         (required (remove-if-not #'requiredp slots)))
+    (remove-if (lambda (slot)
+                 (slot-boundp api (c2mop:slot-definition-name slot)))
+               required)))
 
 (defmethod execute-api-call ((api api) fun url args-plist)
   (with-captured-dex-error
     (apply fun url args-plist)))
+
+(defmethod print-object ((obj api) stream)
+  (print-unreadable-object (obj stream :type t :identity t)
+    (format stream "~%~A ~A~%JSON: ~A~%MISSING: ~{~A~^, ~}"
+            (request-fun obj)
+            (generate-url obj)
+            (generate-body obj)
+            (let ((missing (slots-still-missing obj)))
+              (if missing
+                  (mapcar #'c2mop:slot-definition-name missing)
+                  (list 'NONE))))))
+

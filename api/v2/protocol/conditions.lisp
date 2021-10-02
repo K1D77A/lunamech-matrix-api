@@ -24,6 +24,14 @@
   (:documentation "Signalled when the user declares the api special but (special-slot api)
 is not bound, meaning that they forgot to declare a slot special and fill it."))
 
+(define-condition connection-unbound (api-protocol-condition)
+  ((obj
+    :accessor obj
+    :initarg :obj
+    :documentation "The object"))
+  (:documentation "Signalled when you create an instance of an api call but dont create it
+with the connection object."))
+
 (define-condition missing-required-data (api-protocol-condition)
   ((slot
     :accessor slot

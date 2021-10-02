@@ -11,12 +11,23 @@
    (category 
     :accessor category
     :initarg :category
-    :initform nil)
+    :initform :send)
    (requiredp 
     :accessor requiredp
     :initarg :requiredp
-    :initform t))
+    :initform nil))
   (:documentation "A toplevel class used to define new webhooks."))
+
+(defgeneric validate-slot (slot)
+  (:method-combination progn :most-specific-first))
+
+(defmethod validate-slot progn ((slot api-slot))
+  (with-accessors ((requiredp requiredp)
+                   (category category))
+      slot
+    (cond ((and (not (eq category :send))
+                requiredp)
+           (error "Cannot be requiredp but not have the category :send")))))
 
 (defclass api-send-slot (api-slot)
   ((encoder
@@ -33,7 +44,24 @@
    (specialp
     :reader specialp
     :initarg :specialp
+    :initform nil)
+   (query-param-p
+    :accessor query-param-p
+    :initarg :query-param-p
     :initform nil)))
+
+(defmethod validate-slot progn ((slot api-send-slot))
+  "Makes sure a slot is conforming."
+  (with-accessors ((in-url-p in-url-p)
+                   (query-param-p query-param-p)
+                   (specialp specialp))
+      slot 
+    (cond ((and in-url-p query-param-p specialp)
+           (error "cannot be in url a query param and a special at the same time"))
+          ((and in-url-p query-param-p)
+           (error "only one of in-url-p or query-param-p should be t"))
+          ((and specialp (or in-url-p query-param-p))
+           (error "neither in-url-p or query-param-p can be t when slot is specialp")))))
 
 (defclass api-send-slot-special (api-send-slot)
   ((specialp
@@ -51,6 +79,9 @@
     :accessor api
     :initarg :api
     :initform "/_matrix/client/r0/")
+   (request-fun
+    :reader request-fun
+    :initarg :request-fun)
    (rate-limited-p
     :accessor rate-limited-p
     :initarg :rate-limited-p
@@ -62,10 +93,6 @@
    (string-constructor
     :accessor string-constructor
     :initform nil)
-   (request-type
-    :reader request-type
-    :initarg :request-type
-    :initform :post)
    (required-slots 
     :accessor required-slots
     :initform nil)
@@ -79,3 +106,17 @@
    (special-slot
     :reader special-slot
     :initform nil)))
+
+(defclass api-call%post (api-call)
+  ((request-fun :initform #'dexador:get)))
+
+(defclass api-call%get (api-call)
+  ((request-fun :initform #'dexador:get)))
+
+(defclass api-call%delete (api-call) 
+  ((request-fun :initform #'dexador:delete)))
+
+(defclass api-call%put (api-call)
+  ((request-fun :initform #'dexador:put)))
+
+
