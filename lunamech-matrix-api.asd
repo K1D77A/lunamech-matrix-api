@@ -35,5 +35,14 @@
                                            (:file "api-protocol")))
                              (:file "classes")
                              (:file "conditions")
+                             (:module "2"
+                              :serial t
+                              :components ((:file "api")))
+                             (:module "4"
+                              :serial t
+                              :components ((:file "api")))
+                             (:module "5"
+                              :serial t
+                              :components ((:file "api")))
                              (:file "user-api")))))
 
