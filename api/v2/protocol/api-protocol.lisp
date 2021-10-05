@@ -374,8 +374,14 @@ removed if no value is added."
   (with-accessors ((name->json name->json))
       slot
     (let ((name  (c2mop:slot-definition-name slot)))
-      (format nil "~A=~A" (if name->json name->json (url-e name))
-              (url-e (slot-value api name))))))
+      (format nil "~A=~A" (if name->json name->json (str:snake-case (correct-encode name)))
+              (correct-encode (slot-value api name))))))
+
+(defmethod correct-encode (value)
+  (typecase value
+    (string (url-e value))
+    (symbol (url-e (symbol-name value)))
+    (otherwise value)))
 
 (defmethod query-param-slots->string ((api api) slots)
   (let ((strings (mapcar (lambda (slot) (query-param-slot->string api slot)) slots)))

@@ -41,6 +41,11 @@
     :initform nil)
    (category
     :initform :send)
+   (one-of
+    :accessor one-of
+    :initarg :one-of
+    :initform nil
+    :documentation "A list of potential values.")
    (specialp
     :reader specialp
     :initarg :specialp
@@ -108,7 +113,7 @@
     :initform nil)))
 
 (defclass api-call%post (api-call)
-  ((request-fun :initform #'dexador:get)))
+  ((request-fun :initform #'dexador:post)))
 
 (defclass api-call%get (api-call)
   ((request-fun :initform #'dexador:get)))

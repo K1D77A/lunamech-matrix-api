@@ -15,7 +15,8 @@
                :accessor login-type
                :initform "m.login.password"
                :name->json :type
-               :requiredp t)
+               :requiredp t
+               :one-of '("m.login.password" "m.login.token"))
               (identifier
                :accessor identifier
                :initarg :identifier
@@ -48,7 +49,8 @@
                :initarg :kind
                :name->json "kind"
                :initform "user"
-               :query-param-p t)
+               :query-param-p t
+               :one-of '("guest" "user"))
               (auth
                :accessor auth
                :initarg :auth
@@ -271,7 +273,8 @@
               (medium
                :accessor medium
                :initarg :medium
-               :requiredp t)
+               :requiredp t
+               :one-of '("email" "msisdn"))
               (address
                :accessor address
                :initarg :address
@@ -288,6 +291,7 @@
               (medium
                :accessor medium
                :initarg :medium
+               :one-of '("email" "msisdn")
                :requiredp t)
               (address
                :accessor address
