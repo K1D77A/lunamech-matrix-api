@@ -44,5 +44,17 @@
                              (:module "5"
                               :serial t
                               :components ((:file "api")))
+                             (:module "6"
+                              :serial t
+                              :components ((:file "api")))
+                             (:module "8"
+                              :serial t
+                              :components ((:file "api")))
+                             (:module "9"
+                              :serial t
+                              :components ((:file "api")))
+                             (:module "10"
+                              :serial t
+                              :components ((:file "api")))
                              (:file "user-api")))))
 
