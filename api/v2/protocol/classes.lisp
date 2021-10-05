@@ -103,7 +103,10 @@
     :initform nil)
    (content-type
     :reader content-type
-    :initform "application/json; charset=utf-8")
+    :initarg :content-type
+    :initform "application/json; charset=utf-8"
+    :documentation "Change to a symbol and that slot will be used for the content type 
+instead")
    (specialp
     :reader specialp
     :initarg :specialp

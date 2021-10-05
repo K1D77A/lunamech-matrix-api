@@ -297,7 +297,7 @@ removed if no value is added."
   (in-list (api (class-of api))))
 
 (defmethod content-type ((api api))
-  (content-type (class-of api)))
+  (in-list (content-type (class-of api))))
 
 (defmethod requires-auth-p ((api api))
   (in-list (requires-auth-p (class-of api))))
@@ -328,7 +328,10 @@ removed if no value is added."
       (format nil "Bearer ~A" token))))
 
 (defmethod generate-content-type ((api api))
-  (content-type api))
+  (let ((content-type (content-type api)))
+    (if (stringp content-type)
+        content-type
+        (slot-value api content-type))))
 
 (defmethod generate-authorization-headers ((api api))
   (cons (cons "Content-Type" (generate-content-type api))
@@ -454,9 +457,10 @@ special condition defined in src/classes.lisp and signals."
 
 (defmethod print-object ((obj api) stream)
   (print-unreadable-object (obj stream :type t :identity t)
-    (format stream "~%~A ~A~%JSON: ~A~%MISSING: ~{~A~^, ~}"
+    (format stream "~%~A ~A~%Content-Type: ~A~%JSON: ~A~%MISSING: ~{~A~^, ~}"
             (request-fun obj)
             (generate-url obj)
+            (generate-content-type obj)
             (generate-body obj)
             (let ((missing (slots-still-missing obj)))
               (if missing
