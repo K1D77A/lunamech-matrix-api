@@ -56,5 +56,8 @@
                              (:module "10"
                               :serial t
                               :components ((:file "api")))
+                             (:module "11"
+                              :serial t
+                              :components ((:file "api")))
                              (:file "user-api")))))
 
