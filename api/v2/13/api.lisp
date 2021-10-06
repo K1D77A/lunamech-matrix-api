@@ -1,5 +1,180 @@
 (defpackage #:lunamech-matrix-api/v2/13
-  (:use #:lunamech-matrix-api/v2 #:cl))
+  (:use #:lunamech-matrix-api/v2 #:cl)
+  (:export #:get-turnserver-credentials
+           #:username
+           #:password
+           #:urls
+           #:ttl
+
+           #:rooms%put-typing-notification
+           #:user-id
+           #:room-id
+           #:typing
+           #:timeout
+
+           #:rooms%send-event-receipt
+           #:receipt-type
+           #:event-id
+
+           #:presence%set-presence
+           
+           #:presence%get-presence
+
+           #:media%upload
+           #:content-type
+           #:filename
+           #:bytes
+
+           #:media%get-media
+           #:server-name
+           #:media-id
+           #:allow-remote
+
+           #:media%get-media/filename
+
+           #:media%get-thumbnail
+           #:width
+           #:height
+           #:resize-method
+
+           #:media%get-preview
+           #:url
+           #:ts
+
+           #:media%get-config
+
+           #:protocol%send-to-device
+           #:event-type
+           #:txn
+           #:messages
+
+           #:devices%get-devices
+
+           #:devices%get-device
+           #:device-id
+
+           #:devices%update-device
+           #:display-name
+
+           #:devices%delete-device
+           #:auth
+
+           #:devices%delete-devices
+           #:devices
+
+           #:keys%upload-keys
+           #:device-keys
+           #:one-time-keys
+
+           #:keys%download-devices-and-keys
+           #:token
+
+           #:keys%claim-keys
+
+           #:keys-get-key-changes
+           #:from
+           #:to
+
+           #:pushers#:get-active-pushers
+           #:pushers
+
+           #:pushers%set-pusher
+           #:pushkey
+           #:kind
+           #:app-id
+           #:app-display-name
+           #:device-display-name
+           #:lang
+           #:data
+           #:append-bool
+
+           #:notifications%get-notifications
+           #:only
+           #:limit
+
+           #:pushrules%get-pushrules
+           #:global
+           #:drill-down
+
+           #:pushrules%get-specific-pushrule
+           #:scope
+           #:rule-id
+
+           #:pushrules%delete-specific-pushrule
+
+           #:pushrules%create-pushrule
+           #:after
+           #:actions
+           #:conditions
+           #:pattern 
+
+           #:pushrules%pushrule-enabled
+
+           #:pushrule%enable-pushrule
+           #:enabled
+
+           #:pushrules%pushrule-actions
+
+           #:pushrules%change-a-pushrule-actions
+
+           #:rooms%invite-user-to-room/3pid
+           #:id-server
+           #:id-access-token
+           #:medium
+           #:address
+
+           #:server-side-search
+           #:next-batch
+           #:search-categories
+
+           #:wait-for-events
+
+           #:tags%list-tags
+
+           #:tags%set-tags
+           #:tag
+           #:order
+
+           #:tags%delete-tag
+
+           #:account-data%set-data
+           #:data-type
+
+           #:account-data%get-data
+
+           #:account-data%set-data-in-room
+
+           #:account-data%set-data-in-room
+
+           #:admin%whois-user
+
+           #:rooms%events-before-and-after
+           #:filter
+
+           #:sso%sso-url
+           #:redirect-url
+
+           #:rooms%report-content
+           #:score
+           #:reason
+
+           #:thirdparty%get-protocols-metadata
+
+           #:thirdparty%get-protocol-metadata
+           #:protocol
+
+           #:thirdparty%get-protocol-users
+           #:fields
+
+           #:thirdparty%get-thirdparty-locations
+           #:alias
+
+           #:thirdparty%thirdparty-for-user
+
+           #:openid%request-openid
+
+           #:rooms%upgrade-room
+           #:new-version))
 
 (in-package #:lunamech-matrix-api/v2/13)
 
@@ -271,7 +446,7 @@
             (:rate-limited-p nil)
             (:requires-auth-p t))
 
-(defapi%get devices%get-devices ("devices/:device-id")
+(defapi%get devices%get-device ("devices/:device-id")
             "Gets information about a single device for the current user."
             ((device-id
               :accessor device-id
@@ -542,7 +717,7 @@
             (:rate-limited-p t)
             (:requires-auth-p t))
 
-(defapi%get pushrules%pushrule-enabled-p ("pushrules/:scope/:kind/:rule-id/enabled")
+(defapi%get pushrules%pushrule-enabled ("pushrules/:scope/:kind/:rule-id/enabled")
             "This endpoint gets whether the specified push rule is enabled."
             ((scope
               :accessor scope 
