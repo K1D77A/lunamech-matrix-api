@@ -698,6 +698,302 @@
             (:rate-limited-p nil)
             (:requires-auth-p t))
 
+(defapi%get tags%list-tags ("user/:user-id/rooms/:room-id/tags")
+            "List the tags set by a user on a room."
+            ((user-id
+              :accessor user-id
+              :initarg :user-id
+              :requiredp t
+              :in-url-p t)
+             (room-id
+              :accessor room-id
+              :initarg :room-id
+              :requiredp t
+              :in-url-p t))
+            (:rate-limited-p nil)
+            (:requires-auth-p t))
+
+(defapi%put tags%set-tag ("user/:user-id/rooms/:room-id/tags/:tag")
+            "Add a tag to the room."
+            ((user-id
+              :accessor user-id
+              :initarg :user-id
+              :requiredp t
+              :in-url-p t)
+             (room-id
+              :accessor room-id
+              :initarg :room-id
+              :requiredp t
+              :in-url-p t)
+             (tag
+              :accessor tag
+              :initarg :tag
+              :requiredp t
+              :in-url-p t)
+             (order
+              :accessor order
+              :initarg :order
+              :initform 0))
+            (:rate-limited-p nil)
+            (:requires-auth-p t))
+
+(defapi%delete tags%delete-tag ("user/:user-id/rooms/:room-id/tags/:tag")
+               "Add a tag to the room."
+               ((user-id
+                 :accessor user-id
+                 :initarg :user-id
+                 :requiredp t
+                 :in-url-p t)
+                (room-id
+                 :accessor room-id
+                 :initarg :room-id
+                 :requiredp t
+                 :in-url-p t)
+                (tag
+                 :accessor tag
+                 :initarg :tag
+                 :requiredp t
+                 :in-url-p t))
+               (:rate-limited-p nil)
+               (:requires-auth-p t))
+
+(defapi%put account-data%set-data ("user/:user-id/account_data/:type")
+            "Set some account_data for the client. This config is only visible to the user that set the account_data. The config will be synced to clients in the top-level account_data."
+            ((user-id
+              :accessor user-id
+              :initarg :user-id
+              :requiredp t
+              :in-url-p t)
+             (data-type 
+              :accessor data-type
+              :initarg :data-type
+              :name->json "type"
+              :requiredp t
+              :in-url-p t))
+            (:rate-limited-p nil)
+            (:requires-auth-p t))
+
+(defapi%get account-data%get-data ("user/:user-id/account_data/:type")
+            "Get some account_data for the client. This config is only visible to the user that set the account_data."
+            ((user-id
+              :accessor user-id
+              :initarg :user-id
+              :requiredp t
+              :in-url-p t)
+             (data-type 
+              :accessor data-type
+              :initarg :data-type
+              :name->json "type"
+              :requiredp t
+              :in-url-p t))
+            (:rate-limited-p nil)
+            (:requires-auth-p t))
+
+(defapi%put account-data%set-data-in-room ("user/:user-id/rooms/:room-id/account_data/:type")
+            "Set some account_data for the client on a given room. This config is only visible to the user that set the account_data. The config will be synced to clients in the per-room account_data."
+            ((user-id
+              :accessor user-id
+              :initarg :user-id
+              :requiredp t
+              :in-url-p t)
+             (room-id
+              :accessor room-id
+              :initarg :room-id
+              :requiredp t
+              :in-url-p t)
+             (data-type 
+              :accessor data-type
+              :initarg :data-type
+              :name->json "type"
+              :requiredp t
+              :in-url-p t))
+            (:rate-limited-p nil)
+            (:requires-auth-p t))
+
+(defapi%get account-data%set-data-in-room ("user/:user-id/rooms/:room-id/account_data/:type")
+            "Get some account_data for the client on a given room. This config is only visible to the user that set the account_data."
+            ((user-id
+              :accessor user-id
+              :initarg :user-id
+              :requiredp t
+              :in-url-p t)
+             (room-id
+              :accessor room-id
+              :initarg :room-id
+              :requiredp t
+              :in-url-p t)
+             (data-type 
+              :accessor data-type
+              :initarg :data-type
+              :name->json "type"
+              :requiredp t
+              :in-url-p t))
+            (:rate-limited-p nil)
+            (:requires-auth-p t))
+
+(defapi%get admin%whois-user ("admin/whois/:user-id")
+            "Gets information about a particular user."
+            ((user-id
+              :accessor user-id
+              :initarg :user-id
+              :requiredp t
+              :in-url-p t))
+            (:rate-limited-p nil)
+            (:requires-auth-p t))
+
+(defapi%get rooms%events-before-and-after ("rooms/:room-id/context/:event-id")
+            "This API returns a number of events that happened just before and after the specified event. This allows clients to get the context surrounding an event."
+            ((event-id
+              :accessor event-id
+              :initarg :event-id
+              :requiredp t
+              :in-url-p t)
+             (room-id
+              :accessor room-id
+              :initarg :room-id
+              :requiredp t
+              :in-url-p t)
+             (limit
+              :accessor limit
+              :initarg :limit
+              :query-param-p t)
+             (filter
+              :accessor filter
+              :initarg :filter
+              :query-param-p t))
+            (:rate-limited-p nil)
+            (:requires-auth-p t))
+
+(defapi%get sso%sso-url ("login/sso/redirect")
+            "A web-based Matrix client should instruct the user's browser to navigate to this endpoint in order to log in via SSO."
+            ((redirect-url
+              :accessor redirect-url
+              :initarg :redirect-url
+              :query-param-p t
+              :requiredp t))            
+            (:rate-limited-p nil)
+            (:requires-auth-p nil))
+
+(defapi%get rooms%report-content ("rooms/:room-id/report/:event-id")
+            "Reports an event as inappropriate to the server, which may then notify the appropriate people"
+            ((event-id
+              :accessor event-id
+              :initarg :event-id
+              :requiredp t
+              :in-url-p t)
+             (room-id
+              :accessor room-id
+              :initarg :room-id
+              :requiredp t
+              :in-url-p t)
+             (score
+              :accessor score
+              :initarg :score
+              :initform -50
+              :requiredp t)
+             (reason
+              :accessor reason
+              :initarg :reason
+              :initform "This makes me sad."
+              :requiredp t))
+            (:rate-limited-p nil)
+            (:requires-auth-p t))
+
+(defapi%get thirdparty%get-protocols-metadata ("thirdparty/protocols")
+            "Fetches the overall metadata about protocols supported by the homeserver. Includes both the available protocols and all fields required for queries against each protocol."
+            ()
+            (:rate-limited-p nil)
+            (:requires-auth-p t))
+
+(defapi%get thirdparty%get-protocol-metadata ("thirdparty/protocol/:protocol")
+            "Fetches the metadata from the homeserver about a particular third party protocol."
+            ((protocol
+              :accessor protocol
+              :initarg :protocol
+              :requiredp t
+              :in-url-p t))
+            (:rate-limited-p nil)
+            (:requires-auth-p t))
+
+(defapi%get thirdparty%get-protocol-location ("thirdparty/location/:protocol")
+            "Requesting this endpoint with a valid protocol name results in a list of successful mapping results in a JSON array. Each result contains objects to represent the Matrix room or rooms that represent a portal to this third party network. Each has the Matrix room alias string, an identifier for the particular third party network protocol, and an object containing the network-specific fields that comprise this identifier. It should attempt to canonicalise the identifier as much as reasonably possible given the network type."
+            ((protocol
+              :accessor protocol
+              :initarg :protocol
+              :requiredp t
+              :in-url-p t)
+             (search-fields
+              :accessor search-fields
+              :initarg :search-fields
+              :name->json "searchFields"
+              :requiredp t))
+            (:rate-limited-p nil)
+            (:requires-auth-p t))
+
+(defapi%get thirdparty%get-protocol-users ("thirdparty/user/:protocol")
+            "Retrieve a Matrix User ID linked to a user on the third party service, given a set of user parameters."
+            ((protocol
+              :accessor protocol
+              :initarg :protocol
+              :requiredp t
+              :in-url-p t)
+             (fields
+              :accessor fields
+              :initarg :fields
+              :requiredp t))
+            (:rate-limited-p nil)
+            (:requires-auth-p t))
+
+(defapi%get thirdparty%get-thirdparty-locations ("thirdparty/location")
+            "Retrieve an array of third party network locations from a Matrix room alias."
+            ((alias 
+              :accessor alias 
+              :initarg :alias 
+              :requiredp t))
+            (:rate-limited-p nil)
+            (:requires-auth-p t))
+
+(defapi%get thirdparty%thirdparty-for-user ("thirdparty/user")
+            "Retrieve an array of third party users from a Matrix User ID."
+            ((user-id
+              :accessor user-id
+              :initarg :user-id
+              :query-param-p t
+              :requiredp t))
+            (:rate-limited-p nil)
+            (:requires-auth-p t))
+
+(defapi%post openid%request-openid ("user/:user-id/openid/request_token")
+             "Gets an OpenID token object that the requester may supply to another service to verify their identity in Matrix. The generated token is only valid for exchanging for user information from the federation API for OpenID."
+             ((user-id
+               :accessor user-id
+               :initarg :user-id
+               :in-url-p t
+               :requiredp t))
+             (:rate-limited-p t)
+             (:requires-auth-p t))
+
+(defapi%post rooms%upgrade-room ("rooms/:room-id/upgrade")
+             "Upgrades the given room to a particular room version."
+             ((room-id
+               :accessor room-id
+               :initarg :room-id
+               :in-url-p t
+               :requiredp t)
+              (new-version
+               :accessor new-version
+               :initarg :new-version
+               :in-url-p t
+               :requiredp t))
+             (:rate-limited-p nil)
+             (:requires-auth-p t))
+
+
+
+
+
+
+
 
 
 
