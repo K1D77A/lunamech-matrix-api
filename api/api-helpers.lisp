@@ -4,6 +4,11 @@
 
 (defparameter +content-type+ "application/json; charset=utf-8");;I will back to const
 
+(defun url-e (url)
+  (do-urlencode:urlencode url))
+
+
+
 (defun gen-headers (connection &optional (content-type +content-type+))
   "Generates a header list for use with dex"
   `(("Content-Type" . ,content-type)

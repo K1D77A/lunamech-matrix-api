@@ -1,5 +1,8 @@
 ;; (defpackage #:lunamech-matrix-api/v2/2
-;;   (:use #:lunamech-matrix-api/v2 #:cl))
+;;   (:use ;;#:lunamech-matrix-api/v2/api
+;;         #:lunamech-matrix-api/v2
+;;         #:cl)
+;;   (:export #:client-versions))
 
 (in-package #:lunamech-matrix-api/v2/api)
 

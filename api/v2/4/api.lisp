@@ -1,5 +1,6 @@
 ;; (defpackage #:lunamech-matrix-api/v2/4
-;;   (:use #:lunamech-matrix-api/v2 #:cl))
+;;   (:use #:lunamech-matrix-api/v2/api #:cl)
+;;   (:export #:discover-domain-info))
 
 (in-package #:lunamech-matrix-api/v2/api)
 
