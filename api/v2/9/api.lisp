@@ -1,46 +1,46 @@
-(defpackage #:lunamech-matrix-api/v2/9
-  (:use #:lunamech-matrix-api/v2 #:cl)
-  (:export #:sync
-           #:filter
-           #:since
-           #:full-state
-           #:set-presence
-           #:timeout
+;; (defpackage #:lunamech-matrix-api/v2/9
+;;   (:use #:lunamech-matrix-api/v2 #:cl)
+;;   (:export #:sync
+;;            #:filter
+;;            #:since
+;;            #:full-state
+;;            #:set-presence
+;;            #:timeout
 
-           #:events%get-from-id
-           #:room-id
-           #:event-id
+;;            #:events%get-from-id
+;;            #:room-id
+;;            #:event-id
 
-           #:events%get-from-type-with-statekey
-           #:event-type
-           #:state-key
+;;            #:events%get-from-type-with-statekey
+;;            #:event-type
+;;            #:state-key
 
-           #:events%get-state-events-in-room
+;;            #:events%get-state-events-in-room
 
-           #:events%get-room-members
-           #:at
-           #:membership
-           #:not-membership
+;;            #:events%get-room-members
+;;            #:at
+;;            #:membership
+;;            #:not-membership
 
-           #:events%get-joined-members
+;;            #:events%get-joined-members
 
-           #:events%get-room-messages
-           #:from
-           #:to
-           #:dir
-           #:limit
-           #:filter
+;;            #:events%get-room-messages
+;;            #:from
+;;            #:to
+;;            #:dir
+;;            #:limit
+;;            #:filter
 
-           #:events%put-state-event-into-room
-           #:body
+;;            #:events%put-state-event-into-room
+;;            #:body
 
-           #:events%put-message-event-into-room
-           #:txn
+;;            #:events%put-message-event-into-room
+;;            #:txn
 
-           #:events%redact-event
-           #:reason))
+;;            #:events%redact-event
+;;            #:reason))
 
-(in-package #:lunamech-matrix-api/v2/9)
+(in-package #:lunamech-matrix-api/v2/api)
 
 (defapi%get sync ("sync")
             "Sync"

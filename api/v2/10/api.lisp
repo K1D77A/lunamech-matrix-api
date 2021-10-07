@@ -1,64 +1,64 @@
-(defpackage #:lunamech-matrix-api/v2/10
-  (:use #:lunamech-matrix-api/v2 #:cl)
-  (:export #:create-room
-           #:visibility
-           #:room-alias-name
-           #:name
-           #:topic
-           #:invite
-           #:invite-3pid
-           #:room-version
-           #:creation-content
-           #:initial-state
-           #:preset
-           #:is-direct
-           #:power-level-content-override
+;; (defpackage #:lunamech-matrix-api/v2/10
+;;   (:use #:lunamech-matrix-api/v2 #:cl)
+;;   (:export #:create-room
+;;            #:visibility
+;;            #:room-alias-name
+;;            #:name
+;;            #:topic
+;;            #:invite
+;;            #:invite-3pid
+;;            #:room-version
+;;            #:creation-content
+;;            #:initial-state
+;;            #:preset
+;;            #:is-direct
+;;            #:power-level-content-override
 
-           #:alias%new-room-alias
-           #:room-alias
-           #:room-id
+;;            #:alias%new-room-alias
+;;            #:room-alias
+;;            #:room-id
 
-           #:alias%resolve-room-alias
+;;            #:alias%resolve-room-alias
 
-           #:alias%delete-room-alias
+;;            #:alias%delete-room-alias
 
-           #:alias%list-a-rooms-aliases
+;;            #:alias%list-a-rooms-aliases
 
-           #:rooms%my-joined-rooms
+;;            #:rooms%my-joined-rooms
 
-           #:rooms%invite-user-to-room
-           #:user-id
-           
-           #:rooms%join-a-room
-           #:third-party-signed
+;;            #:rooms%invite-user-to-room
+;;            #:user-id
 
-           #:rooms%join-a-room/alias-or-id
-           #:room-id-or-alias
-           #:server-name
-           #:third-party-signed
+;;            #:rooms%join-a-room
+;;            #:third-party-signed
 
-           #:rooms%leave-a-room
+;;            #:rooms%join-a-room/alias-or-id
+;;            #:room-id-or-alias
+;;            #:server-name
+;;            #:third-party-signed
 
-           #:rooms%kick-user-from-room
-           #:reason
-           
-           #:rooms%ban-user-from-room
+;;            #:rooms%leave-a-room
 
-           #:rooms%unban-user-from-room
+;;            #:rooms%kick-user-from-room
+;;            #:reason
 
-           #:rooms%set-room-visibility
+;;            #:rooms%ban-user-from-room
 
-           #:rooms%public-rooms
-           #:limit
-           #:since
-           #:server
+;;            #:rooms%unban-user-from-room
 
-           #:rooms%public-rooms/filtered
-           #:filter
-           #:include-all-networks
-           #:third-party-instance-id))
+;;            #:rooms%set-room-visibility
 
-  (in-package #:lunamech-matrix-api/v2/10)
+;;            #:rooms%public-rooms
+;;            #:limit
+;;            #:since
+;;            #:server
+
+;;            #:rooms%public-rooms/filtered
+;;            #:filter
+;;            #:include-all-networks
+;;            #:third-party-instance-id))
+
+(in-package #:lunamech-matrix-api/v2/api)
 
 (defapi%post create-room ("createRoom")
              "Create a new room with various configuration options."

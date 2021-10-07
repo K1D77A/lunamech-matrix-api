@@ -1,182 +1,182 @@
-(defpackage #:lunamech-matrix-api/v2/13
-  (:use #:lunamech-matrix-api/v2 #:cl)
-  (:export #:get-turnserver-credentials
-           #:username
-           #:password
-           #:urls
-           #:ttl
+;; (defpackage #:lunamech-matrix-api/v2/13
+;;   (:use #:lunamech-matrix-api/v2 #:cl)
+;;   (:export #:get-turnserver-credentials
+;;            #:username
+;;            #:password
+;;            #:urls
+;;            #:ttl
 
-           #:rooms%put-typing-notification
-           #:user-id
-           #:room-id
-           #:typing
-           #:timeout
+;;            #:rooms%put-typing-notification
+;;            #:user-id
+;;            #:room-id
+;;            #:typing
+;;            #:timeout
 
-           #:rooms%send-event-receipt
-           #:receipt-type
-           #:event-id
+;;            #:rooms%send-event-receipt
+;;            #:receipt-type
+;;            #:event-id
 
-           #:presence%set-presence
-           
-           #:presence%get-presence
+;;            #:presence%set-presence
 
-           #:media%upload
-           #:content-type
-           #:filename
-           #:bytes
+;;            #:presence%get-presence
 
-           #:media%get-media
-           #:server-name
-           #:media-id
-           #:allow-remote
+;;            #:media%upload
+;;            #:content-type
+;;            #:filename
+;;            #:bytes
 
-           #:media%get-media/filename
+;;            #:media%get-media
+;;            #:server-name
+;;            #:media-id
+;;            #:allow-remote
 
-           #:media%get-thumbnail
-           #:width
-           #:height
-           #:resize-method
+;;            #:media%get-media/filename
 
-           #:media%get-preview
-           #:url
-           #:ts
+;;            #:media%get-thumbnail
+;;            #:width
+;;            #:height
+;;            #:resize-method
 
-           #:media%get-config
+;;            #:media%get-preview
+;;            #:url
+;;            #:ts
 
-           #:protocol%send-to-device
-           #:event-type
-           #:txn
-           #:messages
+;;            #:media%get-config
 
-           #:devices%get-devices
+;;            #:protocol%send-to-device
+;;            #:event-type
+;;            #:txn
+;;            #:messages
 
-           #:devices%get-device
-           #:device-id
+;;            #:devices%get-devices
 
-           #:devices%update-device
-           #:display-name
+;;            #:devices%get-device
+;;            #:device-id
 
-           #:devices%delete-device
-           #:auth
+;;            #:devices%update-device
+;;            #:display-name
 
-           #:devices%delete-devices
-           #:devices
+;;            #:devices%delete-device
+;;            #:auth
 
-           #:keys%upload-keys
-           #:device-keys
-           #:one-time-keys
+;;            #:devices%delete-devices
+;;            #:devices
 
-           #:keys%download-devices-and-keys
-           #:token
+;;            #:keys%upload-keys
+;;            #:device-keys
+;;            #:one-time-keys
 
-           #:keys%claim-keys
+;;            #:keys%download-devices-and-keys
+;;            #:token
 
-           #:keys-get-key-changes
-           #:from
-           #:to
+;;            #:keys%claim-keys
 
-           #:pushers#:get-active-pushers
-           #:pushers
+;;            #:keys-get-key-changes
+;;            #:from
+;;            #:to
 
-           #:pushers%set-pusher
-           #:pushkey
-           #:kind
-           #:app-id
-           #:app-display-name
-           #:device-display-name
-           #:lang
-           #:data
-           #:append-bool
+;;            #:pushers%get-active-pushers
+;;            #:pushers
 
-           #:notifications%get-notifications
-           #:only
-           #:limit
+;;            #:pushers%set-pusher
+;;            #:pushkey
+;;            #:kind
+;;            #:app-id
+;;            #:app-display-name
+;;            #:device-display-name
+;;            #:lang
+;;            #:data
+;;            #:append-bool
 
-           #:pushrules%get-pushrules
-           #:global
-           #:drill-down
+;;            #:notifications%get-notifications
+;;            #:only
+;;            #:limit
 
-           #:pushrules%get-specific-pushrule
-           #:scope
-           #:rule-id
+;;            #:pushrules%get-pushrules
+;;            #:global
+;;            #:drill-down
 
-           #:pushrules%delete-specific-pushrule
+;;            #:pushrules%get-specific-pushrule
+;;            #:scope
+;;            #:rule-id
 
-           #:pushrules%create-pushrule
-           #:after
-           #:actions
-           #:conditions
-           #:pattern 
+;;            #:pushrules%delete-specific-pushrule
 
-           #:pushrules%pushrule-enabled
+;;            #:pushrules%create-pushrule
+;;            #:after
+;;            #:actions
+;;            #:conditions
+;;            #:pattern 
 
-           #:pushrule%enable-pushrule
-           #:enabled
+;;            #:pushrules%pushrule-enabled
 
-           #:pushrules%pushrule-actions
+;;            #:pushrule%enable-pushrule
+;;            #:enabled
 
-           #:pushrules%change-a-pushrule-actions
+;;            #:pushrules%pushrule-actions
 
-           #:rooms%invite-user-to-room/3pid
-           #:id-server
-           #:id-access-token
-           #:medium
-           #:address
+;;            #:pushrules%change-a-pushrule-actions
 
-           #:server-side-search
-           #:next-batch
-           #:search-categories
+;;            #:rooms%invite-user-to-room/3pid
+;;            #:id-server
+;;            #:id-access-token
+;;            #:medium
+;;            #:address
 
-           #:wait-for-events
+;;            #:server-side-search
+;;            #:next-batch
+;;            #:search-categories
 
-           #:tags%list-tags
+;;            #:wait-for-events
 
-           #:tags%set-tags
-           #:tag
-           #:order
+;;            #:tags%list-tags
 
-           #:tags%delete-tag
+;;            #:tags%set-tags
+;;            #:tag
+;;            #:order
 
-           #:account-data%set-data
-           #:data-type
+;;            #:tags%delete-tag
 
-           #:account-data%get-data
+;;            #:account-data%set-data
+;;            #:data-type
 
-           #:account-data%set-data-in-room
+;;            #:account-data%get-data
 
-           #:account-data%set-data-in-room
+;;            #:account-data%set-data-in-room
 
-           #:admin%whois-user
+;;            #:account-data%set-data-in-room
 
-           #:rooms%events-before-and-after
-           #:filter
+;;            #:admin%whois-user
 
-           #:sso%sso-url
-           #:redirect-url
+;;            #:rooms%events-before-and-after
+;;            #:filter
 
-           #:rooms%report-content
-           #:score
-           #:reason
+;;            #:sso%sso-url
+;;            #:redirect-url
 
-           #:thirdparty%get-protocols-metadata
+;;            #:rooms%report-content
+;;            #:score
+;;            #:reason
 
-           #:thirdparty%get-protocol-metadata
-           #:protocol
+;;            #:thirdparty%get-protocols-metadata
 
-           #:thirdparty%get-protocol-users
-           #:fields
+;;            #:thirdparty%get-protocol-metadata
+;;            #:protocol
 
-           #:thirdparty%get-thirdparty-locations
-           #:alias
+;;            #:thirdparty%get-protocol-users
+;;            #:fields
 
-           #:thirdparty%thirdparty-for-user
+;;            #:thirdparty%get-thirdparty-locations
+;;            #:alias
 
-           #:openid%request-openid
+;;            #:thirdparty%thirdparty-for-user
 
-           #:rooms%upgrade-room
-           #:new-version))
+;;            #:openid%request-openid
 
-(in-package #:lunamech-matrix-api/v2/13)
+;;            #:rooms%upgrade-room
+;;            #:new-version))
+
+(in-package #:lunamech-matrix-api/v2/api)
 
 (defapi%get get-turnserver-credentials ("voip/turnServer")
             "This API provides credentials for the client to use when initiating calls."
@@ -985,7 +985,7 @@
             (:rate-limited-p nil)
             (:requires-auth-p t))
 
-(defapi%get account-data%set-data-in-room ("user/:user-id/rooms/:room-id/account_data/:type")
+(defapi%get account-data%get-data-in-room ("user/:user-id/rooms/:room-id/account_data/:type")
             "Get some account_data for the client on a given room. This config is only visible to the user that set the account_data."
             ((user-id
               :accessor user-id

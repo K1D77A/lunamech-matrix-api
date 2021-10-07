@@ -1,7 +1,7 @@
-(defpackage #:lunamech-matrix-api/v2/4
-  (:use #:lunamech-matrix-api/v2 #:cl))
+;; (defpackage #:lunamech-matrix-api/v2/4
+;;   (:use #:lunamech-matrix-api/v2 #:cl))
 
-(in-package #:lunamech-matrix-api/v2/4)
+(in-package #:lunamech-matrix-api/v2/api)
 
 (defapi%get discover-domain-info ("")
             "Gets discovery information about the domain."

@@ -1,22 +1,22 @@
-(defpackage #:lunamech-matrix-api/v2/11
-  (:use #:lunamech-matrix-api/v2 #:cl)
-  (:export #:search-for-user
-           #:search-term
-           #:limit
-           
-           #:profile%set-display-name
-           #:user-id
-           #:displayname
+;; (defpackage #:lunamech-matrix-api/v2/11
+;;   (:use #:lunamech-matrix-api/v2 #:cl)
+;;   (:export #:search-for-user
+;;            #:search-term
+;;            #:limit
 
-           #:profile%get-display-name
+;;            #:profile%set-display-name
+;;            #:user-id
+;;            #:displayname
 
-           #:profile%set-avatar-url
-           #:avatar-url
+;;            #:profile%get-display-name
 
-           #:profile%get-avatar-url
-           #:profile%get-profile-information))
+;;            #:profile%set-avatar-url
+;;            #:avatar-url
 
-(in-package #:lunamech-matrix-api/v2/11)
+;;            #:profile%get-avatar-url
+;;            #:profile%get-profile-information))
+
+(in-package #:lunamech-matrix-api/v2/api)
 
 (defapi%post search-for-user ("user_directory/search")
              "Performs a search for users."

@@ -35,6 +35,7 @@
                                            (:file "api-protocol")))
                              (:file "classes")
                              (:file "conditions")
+                             (:file "api-package")
                              (:module "2"
                               :serial t
                               :components ((:file "api")))
@@ -62,5 +63,5 @@
                              (:module "13"
                               :serial t
                               :components ((:file "api")))
+                            ;; (:file "superpackage")
                              (:file "user-api")))))
-

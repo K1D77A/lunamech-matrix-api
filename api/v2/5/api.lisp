@@ -1,7 +1,8 @@
-(defpackage #:lunamech-matrix-api/v2/5
-  (:use #:lunamech-matrix-api/v2 #:cl))
+;; (defpackage #:lunamech-matrix-api/v2/5
+;;   (:use #:lunamech-matrix-api/v2 #:cl)
+;;  )
 
-(in-package #:lunamech-matrix-api/v2/5)
+(in-package #:lunamech-matrix-api/v2/api)
 
 (defapi%get get-supported-logins ("login")
             "Gets the homeserver's supported login types to authenticate users. Clients should pick one of these and supply it as the type when logging in."
@@ -100,7 +101,7 @@
              (:rate-limited-p nil)
              (:requires-auth-p nil))
 
-(defapi%post register-account/msisdn/requestToken ("register/msisdn/requestToken")
+(defapi%post register-account/msisdn/request-token ("register/msisdn/requestToken")
              "The homeserver must check that the given phone number is not already associated with an account on this homeserver."
              ((client-secret
                :accessor client-secret
@@ -147,7 +148,7 @@
              (:rate-limited-p t)
              (:requires-auth-p t))
 
-(defapi%post change-password/email/requestToken ("account/password/email/requestTOken")
+(defapi%post change-password/email/request-token ("account/password/email/requestTOken")
              "The homeserver must check that the given email address is associated with an account on this homeserver."
              ((client-secret
                :accessor client-secret
@@ -173,7 +174,7 @@
              (:rate-limited-p t)
              (:requires-auth-p t))
 
-(defapi%post change-password/msisdn/requestToken ("account/password/msisdn/requestToken")
+(defapi%post change-password/msisdn/request-token ("account/password/msisdn/requestToken")
              "The homeserver must check that the given phone number is not already associated with an account on this homeserver."
              ((client-secret
                :accessor client-secret
@@ -300,7 +301,7 @@
              (:rate-limited-p nil)
              (:requires-auth-p t))
 
-(defapi%post 3pid%email/requestToken ("account/3pid/email/requestToken")
+(defapi%post 3pid%email/request-token ("account/3pid/email/requestToken")
              "The homeserver must check that the given email address is not already associated with an account on this homeserver."
              ((client-secret
                :accessor client-secret
@@ -326,7 +327,7 @@
              (:rate-limited-p nil)
              (:requires-auth-p nil))
 
-(defapi%post 3pid%msisdn/requestToken ("account/3pid/msisdn/requestToken")
+(defapi%post 3pid%msisdn/request-token ("account/3pid/msisdn/requestToken")
              "The homeserver must check that the given phone number is not already associated with an account on this homeserver."
              ((client-secret
                :accessor client-secret

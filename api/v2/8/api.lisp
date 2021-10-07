@@ -1,17 +1,17 @@
-(defpackage #:lunamech-matrix-api/v2/8
-  (:use #:lunamech-matrix-api/v2 #:cl)
-  (:export #:filters%upload
-           #:filter%download
-           #:user-id
-           #:event-fields
-           #:event-format
-           #:presence
-           #:account-data
-           #:room-filter
+;; (defpackage #:lunamech-matrix-api/v2/8
+;;   (:use #:lunamech-matrix-api/v2 #:cl)
+;;   (:export #:filters%upload
+;;            #:filter%download
+;;            #:user-id
+;;            #:event-fields
+;;            #:event-format
+;;            #:presence
+;;            #:account-data
+;;            #:room-filter
 
-           #:filter-id))
+;;            #:filter-id))
 
-(in-package #:lunamech-matrix-api/v2/8)
+(in-package #:lunamech-matrix-api/v2/api)
 
 (defapi%post filters%upload ("user/:user-id/filter")
              "Uploads a new filter definition to the homeserver. Returns a filter ID that may be used in future requests to restrict which events are returned to the client."
