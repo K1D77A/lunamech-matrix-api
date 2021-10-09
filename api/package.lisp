@@ -6,6 +6,8 @@
            #:*api*
            #:module-moonmat-message
            #:request-open-id-token
+           #:serialize-connection
+           #:restore-connection
            #:*url*
            #:*luna*
            #:setup-and-go
@@ -204,6 +206,7 @@
            #:m-limit-exceeded
            #:m-message
            #:m-missing-token
+           #:token
            #:m-not-found
            #:m-not-json
            #:m-room-in-use
