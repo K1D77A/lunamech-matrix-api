@@ -212,7 +212,7 @@
                                            api filters status user-id)))
   (let ((connection (make-instance 'connection)))
     (dolist (slot slots connection)
-      (let* ((slot-key (intern (string-upcase slot) :keyword))
+      (let* ((slot-key (intern (string-upcase (symbol-name slot)) :keyword))
              (val (getf list slot-key)))
         (setf (slot-value connection slot)
               (restore-from-key slot-key val))))))
