@@ -385,6 +385,311 @@ Note that Synapse requires at least one message in each room, so it will never d
              (:requires-auth-p t)
              (:rate-limited-p nil))
 
+(defapi%get admin%list-rooms ("rooms")
+            "The List Room admin API allows server admins to get a list of rooms on their server. There are various parameters available that allow for filtering and sorting the returned list. This API supports pagination."
+            ((limit
+              :accessor limit
+              :initarg :limit
+              :initform 100 
+              :query-param-p t
+              :requiredp nil)
+             (order-by
+              :accessor order-by
+              :initarg :order-by
+              :initform "name"
+              :one-of ("name" "canonical_alias"
+                              "joined_members" "joined_local_members"
+                              "version" "creator" "encryption" "federatable"
+                              "public" "join_rules" "guest_access" "history_visibility"
+                              "state_events")
+              :query-param-p t
+              :requiredp nil)
+             (from
+              :accessor from
+              :initarg :from 
+              :initform 0
+              :query-param-p t
+              :requiredp nil)
+             (dir
+              :accessor dir
+              :initarg :dir 
+              :initform "f"
+              :query-param-p t
+              :one-of ("b" "f")
+              :requiredp nil)
+             (search-term
+              :accessor search-term
+              :initarg :search-term
+              :query-param-p t
+              :requiredp nil))
+            (:api "/_synapse/admin/v1/")
+            (:requires-auth-p t)
+            (:rate-limited-p nil))
+
+(defapi%get admin%get-room-details ("rooms/:room-id")
+            "The Room Details admin API allows server admins to get all details of a room."
+            ((room-id
+              :accessor room-id
+              :initarg :room-id
+              :in-url-p t
+              :requiredp t))
+            (:api "/_synapse/admin/v1/")
+            (:requires-auth-p t)
+            (:rate-limited-p nil))
+
+
+(defapi%get admin%get-room-members ("rooms/:room-id/members")
+            "The Room Members admin API allows server admins to get a list of all members of a room."
+            ((room-id
+              :accessor room-id
+              :initarg :room-id
+              :in-url-p t
+              :requiredp t))
+            (:api "/_synapse/admin/v1/")
+            (:requires-auth-p t)
+            (:rate-limited-p nil))
+
+(defapi%get admin%get-room-state ("rooms/:room-id/state")
+            "The Room State admin API allows server admins to get a list of all state events in a room."
+            ((room-id
+              :accessor room-id
+              :initarg :room-id
+              :in-url-p t
+              :requiredp t))
+            (:api "/_synapse/admin/v1/")
+            (:requires-auth-p t)
+            (:rate-limited-p nil))
+
+(defapi%delete admin%delete-room ("rooms/:room-id")
+               "The Delete Room admin API allows server admins to remove rooms from server and block these rooms."
+               ((room-id
+                 :accessor room-id
+                 :initarg :room-id
+                 :in-url-p t
+                 :requiredp t)
+                (new-room-user-id
+                 :accessor new-room-user-id
+                 :initarg :new-room-user-id
+                 :requiredp nil)
+                (room-name
+                 :accessor room-name
+                 :initarg :room-name
+                 :requiredp nil)
+                (message
+                 :accessor message 
+                 :initarg :message
+                 :initform "Room shutdown by admin."
+                 :requiredp nil)
+                (block-room
+                 :accessor block-room
+                 :initarg block-room
+                 :name->json "block"
+                 :initform "false"
+                 :requiredp nil)
+                (purge
+                 :accessor purge
+                 :initarg :purge
+                 :initform "true"
+                 :requiredp nil)
+                (force-purge
+                 :accessor force-purge
+                 :initarg :force-purge
+                 :initform "false"
+                 :requiredp nil))
+               (:api "/_synapse/admin/v1/")
+               (:requires-auth-p t)
+               (:rate-limited-p nil))
+
+(defapi%post admin%make-user-admin-in-room ("join/:room-id-or-alias/make_room_admin")
+             "Grants another user the highest power available to a local user who is in the room. If the user is not in the room, and it is not publicly joinable, then invite the user."
+             ((user-id
+               :accessor user-id
+               :initarg :user-id
+               :requiredp nil)
+              (room-id-or-alias
+               :accessor room-id-or-alias
+               :initarg :room-id-or-alias
+               :in-url-p t
+               :requiredp t))
+             (:api "/_synapse/admin/v1/")
+             (:requires-auth-p t)
+             (:rate-limited-p nil))
+
+(defapi%get admin%get-room-forward-extremities
+    ("join/:room-id-or-alias/forward_extremities")
+    "To check the status of forward extremities for a room:"            
+    ((room-id-or-alias
+      :accessor room-id-or-alias
+      :initarg :room-id-or-alias
+      :in-url-p t
+      :requiredp t))
+    (:api "/_synapse/admin/v1/")
+    (:requires-auth-p t)
+    (:rate-limited-p nil))
+
+(defapi%delete admin%delete-room-forward-extremities
+    ("join/:room-id-or-alias/forward_extremities")
+    "WARNING: Please ensure you know what you're doing and have read the related issue #1760. Under no situations should this API be executed as an automated maintenance task!"
+    ((room-id-or-alias
+      :accessor room-id-or-alias
+      :initarg :room-id-or-alias
+      :in-url-p t
+      :requiredp t))
+    (:api "/_synapse/admin/v1/")
+    (:requires-auth-p t)
+    (:rate-limited-p nil))
+
+(defapi%get admin%get-event-context ("join/:room-id/context/:event-id")
+            "This API lets a client find the context of an event. This is designed primarily to investigate abuse reports."
+            ((room-id
+              :accessor room-id
+              :initarg :room-id
+              :in-url-p t
+              :requiredp t)
+             (event-id
+              :accessor event-id
+              :initarg :event-id
+              :in-url-p t
+              :requiredp t)
+             (limit
+              :accessor limit
+              :initarg :limit
+              :query-param-p t)
+             (filter
+              :accessor filter
+              :initarg :filter
+              :query-param-p t))
+            (:api "/_synapse/admin/v1/")
+            (:requires-auth-p t)
+            (:rate-limited-p nil))
+
+(defapi%post admin%post-server-notice ("send_server_notice")
+             "Sends a server notice."
+             ((user-id
+               :accessor user-id
+               :initarg :user-id
+               :requiredp t)
+              (content
+               :accessor content
+               :initarg :content
+               :requiredp t
+               :specialp t)
+              (event-type
+               :accessor event-type
+               :initarg :event-type
+               :name->json "type"
+               :requiredp nil)
+              (state-key
+               :accessor state-key
+               :initarg :state-key
+               :requiredp nil))
+             (:api "/_synapse/admin/v1/")
+             (:specialp t)
+             (:requires-auth-p t)
+             (:rate-limited-p nil))
+
+(defapi%put admin%put-server-notice ("send_server_notice/:txn")
+            "Sends a server notice."
+            ((user-id
+              :accessor user-id
+              :initarg :user-id
+              :requiredp t)
+             (txn
+              :accessor txn
+              :Initarg :txn
+              :requiredp t)
+             (content
+              :accessor content
+              :initarg :content
+              :requiredp t
+              :specialp t)
+             (event-type
+              :accessor event-type
+              :initarg :event-type
+              :name->json "type"
+              :requiredp nil)
+             (state-key
+              :accessor state-key
+              :initarg :state-key
+              :requiredp nil))
+            (:api "/_synapse/admin/v1/")
+            (:specialp t)
+            (:requires-auth-p t)
+            (:rate-limited-p nil))
+
+(defapi%get admin%get-users-media-statistics ("statistics/users/media")
+            "Returns information about all local media usage of users. Gives the possibility to filter them by time and user."
+            ((limit
+              :accessor limit
+              :initarg :limit
+              :initform 100 
+              :query-param-p t
+              :requiredp nil)
+             (from
+              :accessor from
+              :initarg :from 
+              :initform 0
+              :query-param-p t
+              :requiredp nil)
+             (dir
+              :accessor dir
+              :initarg :dir 
+              :initform "f"
+              :query-param-p t
+              :one-of ("b" "f")
+              :requiredp nil)
+             (order-by
+              :accessor order-by
+              :initarg :order-by
+              :initform "user_id"
+              :one-of ("user_id" "displayname" "media_length" "media_count")
+              :query-param-p t
+              :requiredp nil)
+             (search-term
+              :accessor search-term
+              :initarg :search-term
+              :query-param-p t
+              :requiredp nil)
+             (until-ts
+              :accessor until-ts
+              :initarg :until-ts
+              :query-param-p t
+              :requiredp nil)
+             (from-ts
+              :accessor from-ts
+              :initarg :from-ts
+              :query-param-p t
+              :requiredp nil))
+            (:api "/_synapse/admin/v1/")
+            (:requires-auth-p t)
+            (:rate-limited-p nil))
+
+(defapi%get admin%get-server-version ("server_version")
+            "Gets the server version"
+            ()
+            (:api "/_synapse/admin/v1/")
+            (:requires-auth-p nil)
+            (:rate-limited-p nil))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
