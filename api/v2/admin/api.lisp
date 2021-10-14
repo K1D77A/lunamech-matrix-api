@@ -671,6 +671,446 @@ Note that Synapse requires at least one message in each room, so it will never d
             (:requires-auth-p nil)
             (:rate-limited-p nil))
 
+(defapi%get admin%query-user-account ("users/:user-id")
+            "This API returns information about a specific user account."
+            ((user-id
+              :accessor user-id
+              :initarg :user-id
+              :in-url-p t
+              :requiredp t))
+            (:api "/_synapse/admin/v2/")
+            (:requires-auth-p t)
+            (:rate-limited-p nil))
+
+(defapi%put admin%modify-user-account ("users/:user-id")
+            "This API allows an administrator to create or modify a user account with a specific user_id."
+            ((user-id
+              :accessor user-id
+              :initarg :user-id
+              :in-url-p t
+              :requiredp nil)
+             (password
+              :accessor password
+              :initarg :password
+              :requiredp nil)
+             (displayname
+              :accessor displayname
+              :initarg :displayname
+              :requiredp nil)
+             (threepids 
+              :accessor threepids 
+              :initarg :threepids
+              :requiredp nil
+              :documentation "Array of threepids")
+             (external-ids 
+              :accessor external-ids 
+              :initarg :external-ids 
+              :requiredp nil
+              :documentation "Array of external ids")
+             (avatar-url 
+              :accessor avatar-url 
+              :initarg :avatar-url 
+              :requiredp nil)
+             (admin
+              :accessor admin
+              :initarg :admin
+              :initform "false"
+              :requiredp nil)
+             (deactivated
+              :accessor deactivated
+              :initarg :deactivated
+              :initform "false"
+              :requiredp nil))
+            (:api "/_synapse/admin/v2/")
+            (:requires-auth-p t)
+            (:rate-limited-p nil))
+
+(defapi%get admin%list-accounts ("users")
+            "This API returns all local user accounts. By default, the response is ordered by ascending user ID."
+            ((user-id
+              :accessor user-id
+              :initarg :user-id
+              :query-param-p t
+              :requiredp t)
+             (name 
+              :accessor name 
+              :initarg :name 
+              :query-param-p t
+              :requiredp nil)
+             (guests 
+              :accessor guests 
+              :initarg :guests
+              :initform "false"
+              :query-param-p t
+              :requiredp nil)
+             (deactivated
+              :accessor deactivated
+              :initarg :deactivated
+              :initform "false"
+              :query-param-p t
+              :requiredp nil)
+             (limit
+              :accessor limit
+              :initarg :limit
+              :initform 100 
+              :query-param-p t
+              :requiredp nil)
+             (from
+              :accessor from
+              :initarg :from 
+              :initform 0
+              :query-param-p t
+              :requiredp nil)
+             (dir
+              :accessor dir
+              :initarg :dir 
+              :initform "f"
+              :query-param-p t
+              :one-of ("b" "f")
+              :requiredp nil)
+             (order-by
+              :accessor order-by
+              :initarg :order-by
+              :initform "user_id"
+              :one-of ("name" "is_guest" "admin" "user_type" "deactivated" "shadow_banned"
+                              "displayname" "avatar_url" "creation_ts")
+              :query-param-p t
+              :requiredp nil))
+            (:api "/_synapse/admin/v2/")
+            (:requires-auth-p t)
+            (:rate-limited-p nil))
+
+(defapi%get admin%query-current-sessions ("whois/:user-id")
+            "This API returns information about the active sessions for a specific user."
+            ((user-id
+              :accessor user-id
+              :initarg :user-id
+              :in-url-p t
+              :requiredp t))
+            (:api "/_synapse/admin/v2/")
+            (:requires-auth-p t)
+            (:rate-limited-p nil))
+
+
+(defapi%post admin%deactivate-account ("deactivate/:user-id")
+             "This API deactivates an account. It removes active access tokens, resets the password, and deletes third-party IDs (to prevent the user requesting a password reset)."
+             ((user-id
+               :accessor user-id
+               :initarg :user-id
+               :in-url-p t
+               :requiredp t)
+              (erase
+               :accessor erase
+               :initarg :erase
+               :initform "true"
+               :requiredp t))
+             (:api "/_synapse/admin/v1/")
+             (:requires-auth-p t)
+             (:rate-limited-p nil))
+
+(defapi%post admin%reset-password ("reset_password/:user-id")
+             "Changes the password of another user. This will automatically log the user out of all their devices."
+             ((user-id
+               :accessor user-id
+               :initarg :user-id
+               :in-url-p t
+               :requiredp t)
+              (logout-devices
+               :accessor logout-devices
+               :initarg :logout-devices
+               :initform "true"
+               :requiredp t)
+              (new-password 
+               :accessor new-password 
+               :initarg :new-password
+               :initform "passwordpassword"
+               :requiredp t))
+             (:api "/_synapse/admin/v1/")
+             (:requires-auth-p t)
+             (:rate-limited-p nil))
+
+(defapi%get admin%get-user-admin-status ("users/:user-id/admin")
+            "Get whether a user is a server administrator or not"
+            ((user-id
+              :accessor user-id
+              :initarg :user-id
+              :in-url-p t
+              :requiredp t))
+            (:api "/_synapse/admin/v1/")
+            (:requires-auth-p t)
+            (:rate-limited-p nil))
+
+(defapi%put admin%set-user-admin-status ("users/:user-id/admin")
+            "Set whether a user is a server administrator or not"
+            ((user-id
+              :accessor user-id
+              :initarg :user-id
+              :in-url-p t
+              :requiredp t)
+             (admin
+              :accessor admin
+              :initarg :admin
+              :initform "true"
+              :requiredp t))
+            (:api "/_synapse/admin/v1/")
+            (:requires-auth-p t)
+            (:rate-limited-p nil))
+
+(defapi%get admin%get-users-room-memberships ("users/:user-id/joined_rooms")
+            "Gets a list of all room_id that a specific user_id is member"
+            ((user-id
+              :accessor user-id
+              :initarg :user-id
+              :in-url-p t
+              :requiredp t))
+            (:api "/_synapse/admin/v1/")
+            (:requires-auth-p t)
+            (:rate-limited-p nil))
+
+(defapi%get admin%get-users-uploaded-media ("users/:user-id/media")
+            "Gets a list of all local media that a specific user_id has created. By default, the response is ordered by descending creation date and ascending media ID. The newest media is on top. You can change the order with parameters order_by and dir."
+            ((user-id
+              :accessor user-id
+              :initarg :user-id
+              :in-url-p t
+              :requiredp t)
+             (limit
+              :accessor limit
+              :initarg :limit
+              :initform 100 
+              :query-param-p t
+              :requiredp nil)
+             (from
+              :accessor from
+              :initarg :from 
+              :initform 0
+              :query-param-p t
+              :requiredp nil)
+             (dir
+              :accessor dir
+              :initarg :dir 
+              :initform "f"
+              :query-param-p t
+              :one-of ("b" "f")
+              :requiredp nil)
+             (order-by
+              :accessor order-by
+              :initarg :order-by
+              :initform "user_id"
+              :one-of ("media_id" "upload_name" "created_ts" "last_access_ts" "media_length"
+                                  "media_type" "quarantined_by" "safe_from_quarantine")
+              :query-param-p t
+              :requiredp nil))
+            (:api "/_synapse/admin/v1/")
+            (:requires-auth-p t)
+            (:rate-limited-p nil))
+
+(defapi%delete admin%delete-users-media ("users/:user-id/media")
+               "This API deletes the local media from the disk of your own server that a specific user_id has created. This includes any local thumbnails."
+               ((user-id
+                 :accessor user-id
+                 :initarg :user-id
+                 :in-url-p t
+                 :requiredp t)
+                (limit
+                 :accessor limit
+                 :initarg :limit
+                 :initform 100 
+                 :query-param-p t
+                 :requiredp nil)
+                (dir
+                 :accessor dir
+                 :initarg :dir 
+                 :initform "f"
+                 :query-param-p t
+                 :one-of ("b" "f")
+                 :requiredp nil)
+                (order-by
+                 :accessor order-by
+                 :initarg :order-by
+                 :initform "user_id"
+                 :query-param-p t
+                 :requiredp nil))
+               (:api "/_synapse/admin/v1/")
+               (:requires-auth-p t)
+               (:rate-limited-p nil))
+
+(defapi%post admin%login-as-user ("users/:user-id/login")
+             "Get an access token that can be used to authenticate as that user. Useful for when admins wish to do actions on behalf of a user."
+             ((user-id
+               :accessor user-id
+               :initarg :user-id
+               :in-url-p t
+               :requiredp t)
+              (valid-until-ms
+               :accessor valid-until-ms
+               :initarg :valid-until-ms
+               :query-param-p t
+               :requiredp nil))
+             (:api "/_synapse/admin/v1/")
+             (:requires-auth-p t)
+             (:rate-limited-p nil))
+
+(defapi%get admin%get-users-devices ("users/:user-id/devices")
+            "Gets information about all devices for a specific user_id."
+            ((user-id
+              :accessor user-id
+              :initarg :user-id
+              :in-url-p t
+              :requiredp t))
+            (:api "/_synapse/admin/v2/")
+            (:requires-auth-p t)
+            (:rate-limited-p nil))
+
+(defapi%post admin%delete-users-devices ("users/:user-id/delete_devices")
+             "Deletes the given devices for a specific user_id, and invalidates any access token associated with them."
+             ((user-id
+               :accessor user-id
+               :initarg :user-id
+               :in-url-p t
+               :requiredp t)
+              (devices
+               :accessor devices 
+               :initarg :devices 
+               :requiredp t))
+             (:api "/_synapse/admin/v2/")
+             (:requires-auth-p t)
+             (:rate-limited-p nil))
+
+(defapi%get admin%show-user-device ("users/:user-id/devices/:device-id")
+            "Gets information on a single device, by device_id for a specific user_id."
+            ((user-id
+              :accessor user-id
+              :initarg :user-id
+              :in-url-p t
+              :requiredp t)
+             (device-id 
+              :accessor device-id 
+              :initarg :device-id
+              :in-url-p t 
+              :requiredp t))
+            (:api "/_synapse/admin/v2/")
+            (:requires-auth-p t)
+            (:rate-limited-p nil))
+
+(defapi%put admin%update-user-device ("users/:user-id/devices/:device-id")
+            "Updates the metadata on the given device_id for a specific user_id."
+            ((user-id
+              :accessor user-id
+              :initarg :user-id
+              :in-url-p t
+              :requiredp t)
+             (device-id 
+              :accessor device-id 
+              :initarg :device-id
+              :in-url-p t 
+              :requiredp t)
+             (display-name
+              :accessor display-name
+              :initarg :display-name
+              :requiredp t))
+            (:api "/_synapse/admin/v2/")
+            (:requires-auth-p t)
+            (:rate-limited-p nil))
+
+(defapi%delete admin%delete-user-device ("users/:user-id/devices/:device-id")
+               "Deletes the given device_id for a specific user_id, and invalidates any access token associated with it."
+               ((user-id
+                 :accessor user-id
+                 :initarg :user-id
+                 :in-url-p t
+                 :requiredp t)
+                (device-id 
+                 :accessor device-id 
+                 :initarg :device-id
+                 :in-url-p t 
+                 :requiredp t))
+               (:api "/_synapse/admin/v2/")
+               (:requires-auth-p t)
+               (:rate-limited-p nil))
+
+(defapi%get admin%get-users-pushers ("users/:user-id/pushers")
+            "Gets information about all pushers for a specific user_id."
+            ((user-id
+              :accessor user-id
+              :initarg :user-id
+              :in-url-p t
+              :requiredp t))
+            (:api "/_synapse/admin/v1/")
+            (:requires-auth-p t)
+            (:rate-limited-p nil))
+
+(defapi%post admin%shadowban-user ("users/:user-id/shadow_ban")
+             "Shadow-banning is a useful tool for moderating malicious or egregiously abusive users. A shadow-banned users receives successful responses to their client-server API requests, but the events are not propagated into rooms. This can be an effective tool as it (hopefully) takes longer for the user to realise they are being moderated before pivoting to another account."
+             ((user-id
+               :accessor user-id
+               :initarg :user-id
+               :in-url-p t
+               :requiredp t))
+             (:api "/_synapse/admin/v1/")
+             (:requires-auth-p t)
+             (:rate-limited-p nil))
+
+(defapi%get admin%get-users-ratelimit ("users/:user-id/override_ratelimit")
+            "Get status of ratelimit"
+            ((user-id
+              :accessor user-id
+              :initarg :user-id
+              :in-url-p t
+              :requiredp t))
+            (:api "/_synapse/admin/v1/")
+            (:requires-auth-p t)
+            (:rate-limited-p nil))
+
+
+(defapi%post admin%set-users-ratelimit ("users/:user-id/override_ratelimit")
+             "Get status of ratelimit"
+             ((user-id
+               :accessor user-id
+               :initarg :user-id
+               :in-url-p t
+               :requiredp t)
+              (messages-per-second
+               :accessor messages-per-second
+               :initarg :messages-per-second
+               :initform 0
+               :requiredp nil)
+              (burst-count
+               :accessor burst-count
+               :initarg :burst-count 
+               :initform 0
+               :requiredp nil))
+             (:api "/_synapse/admin/v1/")
+             (:requires-auth-p t)
+             (:rate-limited-p nil))
+
+(defapi%delete admin%delete-users-ratelimit ("users/:user-id/override_ratelimit")
+               "Delete a users ratelimit"
+               ((user-id
+                 :accessor user-id
+                 :initarg :user-id
+                 :in-url-p t
+                 :requiredp t))
+               (:api "/_synapse/admin/v1/")
+               (:requires-auth-p t)
+               (:rate-limited-p nil))
+
+(defapi%post admin%check-username-is-available ("username_avaiable")
+             "Checks to see if a username is available, and valid, for the server. See the client-server API for more information."
+             ((username
+               :accessor username
+               :initarg :username
+               :query-param-p t
+               :requiredp t))
+             (:api "/_synapse/admin/v1/")
+             (:requires-auth-p t)
+             (:rate-limited-p nil))
+
+
+
+
+
+
 
 
 
