@@ -21,7 +21,6 @@
            #:register-account
            #:kind
            #:auth
-           #:username
            #:password
            #:device-id
            #:inhibit-login
@@ -160,7 +159,6 @@
 
            #:rooms%join-a-room/alias-or-id
            #:room-id-or-alias
-           #:server-name
            #:third-party-signed
 
            #:rooms%leave-a-room
@@ -247,8 +245,6 @@
            #:media%get-config
 
            #:protocol%send-to-device
-           #:event-type
-           #:txn
            #:messages
 
            #:devices%get-devices
@@ -377,7 +373,157 @@
            #:openid%request-openid
 
            #:rooms%upgrade-room
-           #:new-version))
+           #:new-version
 
+           ;;admin
+           #:admin%renew-account
+           #:expiration-ts
+           #:enable-renewal-emails
 
+           #:admin%delete-group
+           #:group-id
 
+           #:admin%get-event-reports
+
+           #:admin%get-specific-event-report
+           #:report-id
+
+           #:admin%quarantine-media-by-id
+
+           #:admin%unquarantine-media-by-id
+
+           #:admin%quarantine-media-in-room
+
+           #:admin%quarantine-users-media
+
+           #:admin%protect-media-by-id
+
+           #:admin%unprotect-media-by-id
+
+           #:admin%delete-media-by-id
+
+           #:admin%delete-media-by-date-or-size
+           #:before-ts
+           #:size-gt
+           #:keep-profiles
+
+           #:admin%purge-remote-media-cache
+           #:unix-timestamp-in-ms
+
+           #:admin%purge-room-history
+           #:delete-local-events
+           #:purge-up-to-event-id
+           #:purge-up-to-ts
+
+           #:admin%get-purge-status
+           #:purge-id
+
+           #:admin%register-user
+           #:nonce
+           #:mac
+
+           #:admin%get-one-token
+
+           #:admin%create-token
+           #:uses-allowed
+           #:expiry-time
+           #:token-length
+
+           #:admin%update-token
+
+           #:admin%delete-token
+
+           #:admin%edit-users-room-membership
+
+           #:admin%list-rooms
+
+           #:admin%get-room-details
+
+           #:admin%get-room-members
+
+           #:admin%get-room-state
+
+           #:admin%delete-room
+           #:new-room-user-id
+           #:room-name
+           #:block-room
+           #:purge
+           #:force-purge
+
+           #:admin%make-user-admin-in-room
+
+           #:admin%get-room-forward-extremities
+
+           #:admin%delete-room-forward-extremities
+
+           #:admin%get-event-context
+
+           #:admin%post-server-notice
+           
+           #:admin%put-server-notice
+
+           #:admin%get-users-media-statistics
+           #:order-by
+           #:until-ts
+           #:from-ts
+
+           #:admin%get-server-version
+
+           #:admin%query-user-account
+
+           #:admin%modify-user-account
+           #:threepids
+           #:external-ids
+           #:deactivated
+           #:admin
+
+           #:admin%list-accounts
+           #:guests
+
+           #:admin%query-current-sessions
+
+           #:admin%deactivate-account
+           #:erase
+
+           #:admin%reset-password
+           #:logout-devices
+           #:new-password
+
+           #:admin%get-user-admin-status
+
+           #:admin%set-user-admin-status
+
+           #:admin%get-users-room-memberships
+
+           #:admin%get-users-uploaded-media
+
+           #:admin%delete-users-media
+
+           #:admin%login-as-user
+
+           #:admin%get-users-devices
+
+           #:admin%delete-users-devices
+           #:devices
+
+           #:admin%show-user-device
+           #:device-id
+
+           #:admin%update-user-device
+
+           #:admin%delete-user-device
+
+           #:admin%get-users-pushers
+
+           #:admin%shadowban-user
+
+           #:admin%get-users-ratelimit
+
+           #:admin%set-users-ratelimit
+           #:messages-per-second
+           #:burst-count
+
+           #:admin%delete-users-ratelimit
+
+           #:admin%check-username-is-available
+           ))
