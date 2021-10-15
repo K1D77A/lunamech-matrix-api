@@ -272,7 +272,7 @@
              (presence
               :accessor presence
               :initarg :presence
-              :one-of '("online" "offline" "unavailable")
+              :one-of ("online" "offline" "unavailable")
               :requiredp t)
              (status-msg
               :accessor status-msg
@@ -387,7 +387,7 @@
               :name->json "method"
               :query-param-p t
               :requiredp nil
-              :one-of '("crop" "scale"))
+              :one-of ("crop" "scale"))
              (allow-remote
               :accessor allow-remote
               :initarg :allow-remote
@@ -569,7 +569,7 @@
               (kind 
                :accessor kind
                :initarg :kind
-               :one-of '("http" "email" "null")
+               :one-of ("http" "email" "null")
                :requiredp t)
               (app-id 
                :accessor app-id 
@@ -646,7 +646,7 @@
               :accessor kind 
               :initarg :kind
               :requiredp t
-              :one-of '("override" "underride" "sender" "room" "content")
+              :one-of ("override" "underride" "sender" "room" "content")
               :in-url-p t)
              (rule-id 
               :accessor rule-id 
@@ -666,7 +666,7 @@
                 (kind 
                  :accessor kind 
                  :initarg :kind
-                 :one-of '("override" "underride" "sender" "room" "content")
+                 :one-of ("override" "underride" "sender" "room" "content")
                  :requiredp t
                  :in-url-p t)
                 (rule-id 
@@ -687,7 +687,7 @@
              (kind 
               :accessor kind 
               :initarg :kind
-              :one-of '("override" "underride" "sender" "room" "content")
+              :one-of ("override" "underride" "sender" "room" "content")
               :requiredp t
               :in-url-p t)
              (rule-id 
@@ -706,7 +706,7 @@
              (actions
               :accessor actions
               :initarg :actions
-              :one-of '("notify" "dont_notify" "coalesce" "set_tweak")
+              :one-of ("notify" "dont_notify" "coalesce" "set_tweak")
               :requiredp t)
              (conditions
               :accessor conditions
@@ -728,7 +728,7 @@
              (kind 
               :accessor kind 
               :initarg :kind
-              :one-of '("override" "underride" "sender" "room" "content")
+              :one-of ("override" "underride" "sender" "room" "content")
               :requiredp t
               :in-url-p t)
              (rule-id 
@@ -750,7 +750,7 @@
              (kind 
               :accessor kind 
               :initarg :kind
-              :one-of '("override" "underride" "sender" "room" "content")
+              :one-of ("override" "underride" "sender" "room" "content")
               :requiredp t
               :in-url-p t)
              (rule-id 
@@ -777,7 +777,7 @@
              (kind 
               :accessor kind 
               :initarg :kind
-              :one-of '("override" "underride" "sender" "room" "content")
+              :one-of ("override" "underride" "sender" "room" "content")
               :requiredp t
               :in-url-p t)
              (rule-id 
@@ -799,7 +799,7 @@
              (kind 
               :accessor kind 
               :initarg :kind
-              :one-of '("override" "underride" "sender" "room" "content")
+              :one-of ("override" "underride" "sender" "room" "content")
               :requiredp t
               :in-url-p t)
              (rule-id 
@@ -810,7 +810,7 @@
              (actions
               :accessor actions
               :initarg :actions
-              :one-of '("notify" "dont_notify" "coalesce" "set_tweak")              
+              :one-of ("notify" "dont_notify" "coalesce" "set_tweak")              
               :requiredp t))
             (:rate-limited-p nil)
             (:requires-auth-p t))
@@ -932,7 +932,7 @@
                (:rate-limited-p nil)
                (:requires-auth-p t))
 
-(defapi%put account-data%set-data ("user/:user-id/account_data/:type")
+(defapi%put account-data%set-data ("user/:user-id/account_data/:data-type")
             "Set some account_data for the client. This config is only visible to the user that set the account_data. The config will be synced to clients in the top-level account_data."
             ((user-id
               :accessor user-id
@@ -948,7 +948,7 @@
             (:rate-limited-p nil)
             (:requires-auth-p t))
 
-(defapi%get account-data%get-data ("user/:user-id/account_data/:type")
+(defapi%get account-data%get-data ("user/:user-id/account_data/:data-type")
             "Get some account_data for the client. This config is only visible to the user that set the account_data."
             ((user-id
               :accessor user-id
@@ -964,47 +964,49 @@
             (:rate-limited-p nil)
             (:requires-auth-p t))
 
-(defapi%put account-data%set-data-in-room ("user/:user-id/rooms/:room-id/account_data/:type")
-            "Set some account_data for the client on a given room. This config is only visible to the user that set the account_data. The config will be synced to clients in the per-room account_data."
-            ((user-id
-              :accessor user-id
-              :initarg :user-id
-              :requiredp t
-              :in-url-p t)
-             (room-id
-              :accessor room-id
-              :initarg :room-id
-              :requiredp t
-              :in-url-p t)
-             (data-type 
-              :accessor data-type
-              :initarg :data-type
-              :name->json "type"
-              :requiredp t
-              :in-url-p t))
-            (:rate-limited-p nil)
-            (:requires-auth-p t))
+(defapi%put account-data%set-data-in-room
+    ("user/:user-id/rooms/:room-id/account_data/:data-type")
+    "Set some account_data for the client on a given room. This config is only visible to the user that set the account_data. The config will be synced to clients in the per-room account_data."
+    ((user-id
+      :accessor user-id
+      :initarg :user-id
+      :requiredp t
+      :in-url-p t)
+     (room-id
+      :accessor room-id
+      :initarg :room-id
+      :requiredp t
+      :in-url-p t)
+     (data-type 
+      :accessor data-type
+      :initarg :data-type
+      :name->json "type"
+      :requiredp t
+      :in-url-p t))
+    (:rate-limited-p nil)
+    (:requires-auth-p t))
 
-(defapi%get account-data%get-data-in-room ("user/:user-id/rooms/:room-id/account_data/:type")
-            "Get some account_data for the client on a given room. This config is only visible to the user that set the account_data."
-            ((user-id
-              :accessor user-id
-              :initarg :user-id
-              :requiredp t
-              :in-url-p t)
-             (room-id
-              :accessor room-id
-              :initarg :room-id
-              :requiredp t
-              :in-url-p t)
-             (data-type 
-              :accessor data-type
-              :initarg :data-type
-              :name->json "type"
-              :requiredp t
-              :in-url-p t))
-            (:rate-limited-p nil)
-            (:requires-auth-p t))
+(defapi%get account-data%get-data-in-room
+    ("user/:user-id/rooms/:room-id/account_data/:data-type")
+    "Get some account_data for the client on a given room. This config is only visible to the user that set the account_data."
+    ((user-id
+      :accessor user-id
+      :initarg :user-id
+      :requiredp t
+      :in-url-p t)
+     (room-id
+      :accessor room-id
+      :initarg :room-id
+      :requiredp t
+      :in-url-p t)
+     (data-type 
+      :accessor data-type
+      :initarg :data-type
+      :name->json "type"
+      :requiredp t
+      :in-url-p t))
+    (:rate-limited-p nil)
+    (:requires-auth-p t))
 
 (defapi%get admin%whois-user ("admin/whois/:user-id")
             "Gets information about a particular user."

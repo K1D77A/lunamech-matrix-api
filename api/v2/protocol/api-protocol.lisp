@@ -137,22 +137,28 @@ follow a different scheme.
   (handler-case (connection class)
     (condition (c)
       (error 'connection-unbound :message "Connection is unbound."))))
-  ;; (with-slots (string-constructor)
-  ;;     (class-of class)
-  ;;   (c2mop:set-funcallable-instance-function class (lambda () (funcall #'call-api class)))))
+;; (with-slots (string-constructor)
+;;     (class-of class)
+;;   (c2mop:set-funcallable-instance-function class (lambda () (funcall #'call-api class)))))
 ;;(call-next-method)))
 
 ;;;code for generating the string constructor function
+
+(defun cleaned-slot-name (slot)
+  (symbol-name (c2mop:slot-definition-name slot)))
+
 (defun %find-encoders-for-syms (sym-string-list slots)
   "Maps over SYM-STRING-LIST which is a mix of symbols and strings, if its a string
 returns `(list ,string) if it is a symbol then looks for the slot with the name 
 ,entry and the returns `(cons ,entry ,(encoder slot)), this final accumulated list is 
 returned."
   (mapcar (lambda (entry)
+            (print entry)
             (if (stringp entry)
                 `(list ,entry)
-                (let ((slot (find entry slots :key #'c2mop:slot-definition-name)))
-                  `(cons ,entry ,(encoder slot)))))
+                (let ((slot (find entry slots :key #'cleaned-slot-name
+                                              :test #'string-equal)))
+                  `(cons ,(c2mop:slot-definition-name slot) ,(encoder slot)))))
           sym-string-list))
 
 (defun %upcase-and-intern-starting-with (start list)
@@ -208,7 +214,9 @@ removed if no value is added."
                                            (let ((str-or-sym (car list))
                                                  (encoder? (cdr list)))
                                              (if encoder?
-                                                 (funcall encoder? str-or-sym)
+                                                 (if (stringp str-or-sym)
+                                                     (funcall encoder? str-or-sym)
+                                                     str-or-sym)
                                                  str-or-sym)))
                                          (remove-if #'null (list ,@syms-assoc-encoders)
                                                     :key #'car)))))
@@ -224,7 +232,8 @@ removed if no value is added."
             ,@(append `((:metaclass ,metaclass)                        
                         (:endpoint ,endpoint)
                         (:documentation ,docstring))
-               class-options))))
+               class-options))
+          (c2mop:ensure-finalized (find-class ',name))))
 
 (defmacro defapi%post (name (endpoint) docstring slots &rest class-options)
   `(defapi ,name (,endpoint %post api-call%post) ,docstring ,slots ,@class-options))
@@ -350,9 +359,7 @@ removed if no value is added."
     (unless (slot-boundp api special-slot)
       (error 'special-slot-is-not-bound 
              :message "You have declared a slot special but it is not bound..."))
-    (jojo:to-json (if (slot-boundp api special-slot)
-                      (slot-value api special-slot)
-                      "Special slot has no value"))))
+    (jojo:to-json (slot-value api special-slot))))
 
 (defmethod generate-body%normal ((api api))
   (to-json api))
@@ -412,7 +419,7 @@ removed if no value is added."
                      (auth auth))
         connection
       (let ((url (generate-url api))
-            (header-list (generate-header-list api (to-json api))))
+            (header-list (generate-header-list api (generate-body api))))
         (setf (result api) (jojo:parse (execute-api-call api fun url header-list)))
         (values (result api) api)))))
 
@@ -441,7 +448,6 @@ special condition defined in src/classes.lisp and signals."
                    (condition (,condition);;total catchall oh well
                      (handler-case
                          (progn 
-                           (break)
                            (signal-condition-from-response
                             (jojo:parse (dexador.error:response-body ,condition))))
                        (jojo:<jonathan-error> (,condition)
@@ -460,8 +466,8 @@ special condition defined in src/classes.lisp and signals."
                required)))
 
 (defmethod execute-api-call ((api api) fun url args-plist)
-  ;; (with-captured-dex-error
-  (apply fun url args-plist))
+  (with-captured-dex-error
+    (apply fun url args-plist)))
 
 (defmethod print-object ((obj api) stream)
   (print-unreadable-object (obj stream :type t :identity t)

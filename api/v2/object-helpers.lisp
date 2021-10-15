@@ -22,3 +22,8 @@
   (%quick-hash `(("type" . "m.id.thirdparty")
                  ("country" . ,country)
                  ("phone" . ,phone))))
+
+(defun object%event/m-room-redaction (reason)
+  (values 
+   (%quick-hash `(("reason" . ,reason)))
+   "m.room.redaction"))
