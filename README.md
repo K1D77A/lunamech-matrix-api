@@ -16,6 +16,10 @@ All api calls are instances of a class, simply create an instance with make-inst
 and then use `(call-api <your instance>)` to execute. 
 txnId's are automatically added, so dont fill that slot. Make sure that you always provide :connection as an initarg otherwise you will get an error. 
 
+There is a little bit of thread safety with a connection object using `with-locked-connection` this is used when calling `password-login` and `logout` and every time a call is made that
+uses a txn the lock is grabbed to increment the lock and set it. Other than that there is 
+no other thread safety, however this is more than v1.
+
 
 # v1
 ## See api/user-api 
