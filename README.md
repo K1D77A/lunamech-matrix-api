@@ -2,6 +2,17 @@ Basic implementation of the Matrix API used in [LunaMech](https://github.com/K1D
 
 [Lunamech.com](https://lunamech.com)
 
+# v2
+V2 is under active development while v1 is now in maintenance only mode.
+Currently v2 wraps every call in the spec, the spaces api and every call in the synapse admin api.
+
+## see api/v2/<section>/api.lisp for classes
+
+All api calls are instances of a class, simply create an instance with make-instance 
+and then use `(call-api <your instance>)` to execute. 
+txnId's are automatically added. 
+
+# v1
 ## See api/user-api 
 ## See api/admin-api
 ## See api/spaces
