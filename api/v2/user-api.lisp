@@ -9,7 +9,7 @@
                    (logged-in-p logged-in-p)
                    (auth auth))
       connection 
-    (let ((call (make-instance 'lunamech-matrix-api/v2/api:login-connection 
+    (let ((call (make-instance 'login-connection 
                                :connection connection
                                :device-id (if (slot-boundp connection 'device-id)
                                               device-id
@@ -32,7 +32,7 @@
                    (auth auth))
       connection
     (with-locked-connection (connection)
-      (let ((call (make-instance 'lunamech-matrix-api/v2/api:logout-connection
+      (let ((call (make-instance 'logout-connection
                                  :connection connection)))
         (call-api call)
         (setf logged-in-p nil)
@@ -45,14 +45,14 @@
     (send-event-to-room connection room-id type hash)))
 
 (defun send-event-to-room (connection room-id event-type event)
-  (make-instance 'lunamech-matrix-api/v2/api:events%put-message-event-into-room
-                 :body event 
-                 :room-id room-id
-                 :event-type event-type
-                 :connection connection))
+  (call-api (make-instance 'events%put-message-event-into-room
+                            :body event 
+                            :room-id room-id
+                            :event-type event-type
+                            :connection connection))
 
 (defun redact-event-in-room (connection room-id event-id reason)
-  (call-api (make-instance 'lunamech-matrix-api/v2/api:events%redact-event
+  (call-api (make-instance 'events%redact-event
                            :reason reason
                            :room-id room-id
                            :event-id event-id

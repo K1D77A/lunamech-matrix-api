@@ -1,10 +1,4 @@
-;; (defpackage #:lunamech-matrix-api/v2/2
-;;   (:use ;;#:lunamech-matrix-api/v2/api
-;;         #:lunamech-matrix-api/v2
-;;         #:cl)
-;;   (:export #:client-versions))
-
-(in-package #:lunamech-matrix-api/v2/api)
+(in-package #:lunamech-matrix-api/v2)
 
 (defapi%get client-versions ("versions")
             "Gets the versions of the specification supported by the server."

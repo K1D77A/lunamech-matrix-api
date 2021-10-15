@@ -1,4 +1,4 @@
-(in-package #:lunamech-matrix-api/v2/api)
+(in-package #:lunamech-matrix-api/v2)
 
 (defapi%post admin%renew-account ("account_validity/validity")
              "This API extends the validity of an account by as much time as configured in the period parameter from the account_validity configuration."

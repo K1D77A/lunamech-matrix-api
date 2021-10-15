@@ -1,108 +1,48 @@
-;; (defpackage #:lunamech-matrix-api/v2/10
-;;   (:use #:lunamech-matrix-api/v2 #:cl)
-;;   (:export #:create-room
-;;            #:visibility
-;;            #:room-alias-name
-;;            #:name
-;;            #:topic
-;;            #:invite
-;;            #:invite-3pid
-;;            #:room-version
-;;            #:creation-content
-;;            #:initial-state
-;;            #:preset
-;;            #:is-direct
-;;            #:power-level-content-override
-
-;;            #:alias%new-room-alias
-;;            #:room-alias
-;;            #:room-id
-
-;;            #:alias%resolve-room-alias
-
-;;            #:alias%delete-room-alias
-
-;;            #:alias%list-a-rooms-aliases
-
-;;            #:rooms%my-joined-rooms
-
-;;            #:rooms%invite-user-to-room
-;;            #:user-id
-
-;;            #:rooms%join-a-room
-;;            #:third-party-signed
-
-;;            #:rooms%join-a-room/alias-or-id
-;;            #:room-id-or-alias
-;;            #:server-name
-;;            #:third-party-signed
-
-;;            #:rooms%leave-a-room
-
-;;            #:rooms%kick-user-from-room
-;;            #:reason
-
-;;            #:rooms%ban-user-from-room
-
-;;            #:rooms%unban-user-from-room
-
-;;            #:rooms%set-room-visibility
-
-;;            #:rooms%public-rooms
-;;            #:limit
-;;            #:since
-;;            #:server
-
-;;            #:rooms%public-rooms/filtered
-;;            #:filter
-;;            #:include-all-networks
-;;            #:third-party-instance-id))
-
-(in-package #:lunamech-matrix-api/v2/api)
+(in-package #:lunamech-matrix-api/v2)
 
 (defapi%post create-room ("createRoom")
-             "Create a new room with various configuration options."
-             ((visibility
-               :accessor visibility
-               :initarg :visibility
-               :initform "private"
-               :one-of '("public" "private"))
-              (room-alias-name
-               :accessor room-alias-name
-               :initarg :room-alias-name)
-              (name
-               :accessor name
-               :initarg :name)
-              (topic
-               :accessor topic
-               :initarg :topic)
-              (invite
-               :accessor invite
-               :initarg :invite)
-              (invite-3pid
-               :accessor invite-3pid
-               :initarg :invite-3pid)
-              (room-version
-               :accessor room-version
-               :initarg :room-version)
-              (creation-content
-               :accessor creation-content
-               :initarg :creation-content)
-              (initial-state
-               :accessor initial-state
-               :initarg :initial-state)
-              (preset
-               :accessor preset
-               :initarg :preset
-               :one-of '("private_chat" "public_chat" "trusted_private_chat"))
-              (is-direct
-               :accessor is-direct
-               :initarg :is-direct)
-              (power-level-content-override
-               :accessor power-level-content-override
-               :initarg :power-level-content-override))
-             (:rate-limited-p nil)
-             (:requires-auth-p t))
+  "Create a new room with various configuration options."
+  ((visibility
+    :accessor visibility
+    :initarg :visibility
+    :initform "private"
+    :one-of '("public" "private"))
+   (room-alias-name
+    :accessor room-alias-name
+    :initarg :room-alias-name)
+   (name
+    :accessor name
+    :initarg :name)
+   (topic
+    :accessor topic
+    :initarg :topic)
+   (invite
+    :accessor invite
+    :initarg :invite)
+   (invite-3pid
+    :accessor invite-3pid
+    :initarg :invite-3pid)
+   (room-version
+    :accessor room-version
+    :initarg :room-version)
+   (creation-content
+    :accessor creation-content
+    :initarg :creation-content)
+   (initial-state
+    :accessor initial-state
+    :initarg :initial-state)
+   (preset
+    :accessor preset
+    :initarg :preset
+    :one-of '("private_chat" "public_chat" "trusted_private_chat"))
+   (is-direct
+    :accessor is-direct
+    :initarg :is-direct)
+   (power-level-content-override
+    :accessor power-level-content-override
+    :initarg :power-level-content-override))
+  (:rate-limited-p nil)
+  (:requires-auth-p t))
 
 (defapi%put alias%new-room-alias ("directory/room/:room-alias")
             "Create a new mapping from room alias to room ID."

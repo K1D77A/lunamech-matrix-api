@@ -1,203 +1,25 @@
-;; (defpackage #:lunamech-matrix-api/v2/13
-;;   (:use #:lunamech-matrix-api/v2 #:cl)
-;;   (:export #:get-turnserver-credentials
-;;            #:username
-;;            #:password
-;;            #:urls
-;;            #:ttl
-
-;;            #:rooms%put-typing-notification
-;;            #:user-id
-;;            #:room-id
-;;            #:typing
-;;            #:timeout
-
-;;            #:rooms%send-event-receipt
-;;            #:receipt-type
-;;            #:event-id
-
-;;            #:presence%set-presence
-
-;;            #:presence%get-presence
-
-;;            #:media%upload
-;;            #:content-type
-;;            #:filename
-;;            #:bytes
-
-;;            #:media%get-media
-;;            #:server-name
-;;            #:media-id
-;;            #:allow-remote
-
-;;            #:media%get-media/filename
-
-;;            #:media%get-thumbnail
-;;            #:width
-;;            #:height
-;;            #:resize-method
-
-;;            #:media%get-preview
-;;            #:url
-;;            #:ts
-
-;;            #:media%get-config
-
-;;            #:protocol%send-to-device
-;;            #:event-type
-;;            #:txn
-;;            #:messages
-
-;;            #:devices%get-devices
-
-;;            #:devices%get-device
-;;            #:device-id
-
-;;            #:devices%update-device
-;;            #:display-name
-
-;;            #:devices%delete-device
-;;            #:auth
-
-;;            #:devices%delete-devices
-;;            #:devices
-
-;;            #:keys%upload-keys
-;;            #:device-keys
-;;            #:one-time-keys
-
-;;            #:keys%download-devices-and-keys
-;;            #:token
-
-;;            #:keys%claim-keys
-
-;;            #:keys-get-key-changes
-;;            #:from
-;;            #:to
-
-;;            #:pushers%get-active-pushers
-;;            #:pushers
-
-;;            #:pushers%set-pusher
-;;            #:pushkey
-;;            #:kind
-;;            #:app-id
-;;            #:app-display-name
-;;            #:device-display-name
-;;            #:lang
-;;            #:data
-;;            #:append-bool
-
-;;            #:notifications%get-notifications
-;;            #:only
-;;            #:limit
-
-;;            #:pushrules%get-pushrules
-;;            #:global
-;;            #:drill-down
-
-;;            #:pushrules%get-specific-pushrule
-;;            #:scope
-;;            #:rule-id
-
-;;            #:pushrules%delete-specific-pushrule
-
-;;            #:pushrules%create-pushrule
-;;            #:after
-;;            #:actions
-;;            #:conditions
-;;            #:pattern 
-
-;;            #:pushrules%pushrule-enabled
-
-;;            #:pushrule%enable-pushrule
-;;            #:enabled
-
-;;            #:pushrules%pushrule-actions
-
-;;            #:pushrules%change-a-pushrule-actions
-
-;;            #:rooms%invite-user-to-room/3pid
-;;            #:id-server
-;;            #:id-access-token
-;;            #:medium
-;;            #:address
-
-;;            #:server-side-search
-;;            #:next-batch
-;;            #:search-categories
-
-;;            #:wait-for-events
-
-;;            #:tags%list-tags
-
-;;            #:tags%set-tags
-;;            #:tag
-;;            #:order
-
-;;            #:tags%delete-tag
-
-;;            #:account-data%set-data
-;;            #:data-type
-
-;;            #:account-data%get-data
-
-;;            #:account-data%set-data-in-room
-
-;;            #:account-data%set-data-in-room
-
-;;            #:admin%whois-user
-
-;;            #:rooms%events-before-and-after
-;;            #:filter
-
-;;            #:sso%sso-url
-;;            #:redirect-url
-
-;;            #:rooms%report-content
-;;            #:score
-;;            #:reason
-
-;;            #:thirdparty%get-protocols-metadata
-
-;;            #:thirdparty%get-protocol-metadata
-;;            #:protocol
-
-;;            #:thirdparty%get-protocol-users
-;;            #:fields
-
-;;            #:thirdparty%get-thirdparty-locations
-;;            #:alias
-
-;;            #:thirdparty%thirdparty-for-user
-
-;;            #:openid%request-openid
-
-;;            #:rooms%upgrade-room
-;;            #:new-version))
-
-(in-package #:lunamech-matrix-api/v2/api)
+(in-package #:lunamech-matrix-api/v2)
 
 (defapi%get get-turnserver-credentials ("voip/turnServer")
-            "This API provides credentials for the client to use when initiating calls."
-            ((username
-              :accessor username
-              :initarg :username
-              :requiredp t)
-             (password
-              :accessor password
-              :initarg :password
-              :requiredp t)
-             (urls
-              :accessor urls
-              :initarg :urls
-              :requiredp t)
-             (ttl
-              :accessor ttl
-              :initarg :ttl
-              :requiredp t))
-            (:rate-limited-p t)
-            (:requires-auth-p t))
+  "This API provides credentials for the client to use when initiating calls."
+  ((username
+    :accessor username
+    :initarg :username
+    :requiredp t)
+   (password
+    :accessor password
+    :initarg :password
+    :requiredp t)
+   (urls
+    :accessor urls
+    :initarg :urls
+    :requiredp t)
+   (ttl
+    :accessor ttl
+    :initarg :ttl
+    :requiredp t))
+  (:rate-limited-p t)
+  (:requires-auth-p t))
 
 (defapi%put rooms%put-typing-notification ("rooms/:room-id/typing/:user-id")
             "This tells the server that the user is typing for the next N milliseconds where N is the value specified in the timeout key. Alternatively, if typing is false, it tells the server that the user has stopped typing."

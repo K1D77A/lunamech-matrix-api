@@ -1,13 +1,9 @@
-;; (defpackage #:lunamech-matrix-api/v2/5
-;;   (:use #:lunamech-matrix-api/v2 #:cl)
-;;  )
-
-(in-package #:lunamech-matrix-api/v2/api)
+(in-package #:lunamech-matrix-api/v2)
 
 (defapi%get get-supported-logins ("login")
-            "Gets the homeserver's supported login types to authenticate users. Clients should pick one of these and supply it as the type when logging in."
-            ();tested 
-            (:requires-auth-p nil))
+  "Gets the homeserver's supported login types to authenticate users. Clients should pick one of these and supply it as the type when logging in."
+  ();tested 
+  (:requires-auth-p nil))
 
 (defapi%post login-connection ("login")
              "Authenticates the user, and issues an access token they can use to authorize themself in subsequent requests."

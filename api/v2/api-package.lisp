@@ -1,6 +1,6 @@
-(defpackage #:lunamech-matrix-api/v2/api
-  (:use #:CL #:lunamech-matrix-api/v2)
-  (:nicknames #:v2/api)
+(defpackage #:lunamech-matrix-api/v2
+  (:use #:CL)
+  (:nicknames #:lmav2)
   (:export #:client-versions
            ;;2 ^
            ;;4

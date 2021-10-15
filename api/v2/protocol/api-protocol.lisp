@@ -120,7 +120,7 @@ follow a different scheme.
     (condition (c)
       (error 'connection-unbound :message "Connection is unbound.")))
   (when (contains-txn-p class)
-    (setf (slot-value class 'lunamech-matrix-api/v2/api:txn)
+    (setf (slot-value class 'txn)
           (txn (connection class)))))
 
 ;;;code for generating the string constructor function
@@ -403,11 +403,14 @@ removed if no value is added."
   (symbol-macrolet ((fun (request-fun api))
                     (connection (connection api)))
     (with-accessors ((url url)
-                     (auth auth))
+                     (auth auth)
+                     (logged-in-p logged-in-p))
         connection
+      (when (requires-auth-p api)
+        (or logged-in-p (error "You have to be logged in to use that command.")))
       (when (contains-txn-p api)
         (with-locked-connection ((connection api))
-          (setf (slot-value api 'lunamech-matrix-api/v2/api:txn)
+          (setf (slot-value api 'txn)
                 (incf (txn (connection api))))))
       (let ((url (generate-url api))
             (header-list (generate-header-list api fun (generate-body api))))

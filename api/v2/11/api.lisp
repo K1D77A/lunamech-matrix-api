@@ -1,34 +1,16 @@
-;; (defpackage #:lunamech-matrix-api/v2/11
-;;   (:use #:lunamech-matrix-api/v2 #:cl)
-;;   (:export #:search-for-user
-;;            #:search-term
-;;            #:limit
-
-;;            #:profile%set-display-name
-;;            #:user-id
-;;            #:displayname
-
-;;            #:profile%get-display-name
-
-;;            #:profile%set-avatar-url
-;;            #:avatar-url
-
-;;            #:profile%get-avatar-url
-;;            #:profile%get-profile-information))
-
-(in-package #:lunamech-matrix-api/v2/api)
+(in-package #:lunamech-matrix-api/v2)
 
 (defapi%post search-for-user ("user_directory/search")
-             "Performs a search for users."
-             ((search-term
-               :accessor search-term
-               :initarg :search-term
-               :requiredp t)
-              (limit
-               :accessor limit
-               :initarg :limit))
-             (:rate-limited-p t)
-             (:requires-auth-p t))
+  "Performs a search for users."
+  ((search-term
+    :accessor search-term
+    :initarg :search-term
+    :requiredp t)
+   (limit
+    :accessor limit
+    :initarg :limit))
+  (:rate-limited-p t)
+  (:requires-auth-p t))
 
 (defapi%put profile%set-display-name ("profile/:user-id/displayname")
             "Sets the users displayname"
