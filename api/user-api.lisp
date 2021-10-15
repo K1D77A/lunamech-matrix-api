@@ -156,7 +156,7 @@ CONNECTION."
 (defun admin-whois (connection user-id)
   "Performs a whois call on USER-ID, only an admin can call this on non self users."
   (auth-req (:post connection ("/admin/whois/" user-id)
-                   nil resp)
+             nil resp)
     resp))
 
 (defun upload-content (connection filename content-type content-bytes)
@@ -167,7 +167,7 @@ CONNECTION."
              ;;in the plist
              (list :content-type content-type :content content-bytes)
              resp :media)
-            resp))
+    resp))
 
 (defun send-image-file-to-room (connection room-id name content-type path)
   ""
