@@ -14,6 +14,7 @@
              ;;pw login tested
              ((login-type
                :accessor login-type
+               :initarg :login-type
                :initform "m.login.password"
                :name->json :type
                :requiredp t

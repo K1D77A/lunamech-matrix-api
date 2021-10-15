@@ -526,4 +526,7 @@
            #:admin%delete-users-ratelimit
 
            #:admin%check-username-is-available
-           ))
+
+           #:spaces%space-hierarchy
+           #:suggested-only
+           #:max-depth))

@@ -63,5 +63,11 @@
                              (:module "13"
                               :serial t
                               :components ((:file "api")))
-                            ;; (:file "superpackage")
+                             (:module "admin"
+                              :serial t
+                              :components ((:file "api")))
+                             (:module "spaces"
+                              :serial t
+                              :components ((:file "api")))
+                             (:file "object-helpers")
                              (:file "user-api")))))

@@ -93,7 +93,8 @@ follow a different scheme.
         (if slot
             (c2mop:slot-definition-name slot)
             (error 'set-special
-                   :message "Class is set to special but you have no slots that are declared special"))))))
+                   :message
+                   "Class is set to special but you have no slots that are declared special"))))))
 
 
 
@@ -135,10 +136,10 @@ follow a different scheme.
 (defmethod initialize-instance :after ((class api) &rest initargs)
   (handler-case (connection class)
     (condition (c)
-      (error 'connection-unbound :message "Connection is unbound.")))
-  (with-slots (string-constructor)
-      (class-of class)
-    (c2mop:set-funcallable-instance-function class (lambda () (funcall #'call-api class)))))
+      (error 'connection-unbound :message "Connection is unbound."))))
+  ;; (with-slots (string-constructor)
+  ;;     (class-of class)
+  ;;   (c2mop:set-funcallable-instance-function class (lambda () (funcall #'call-api class)))))
 ;;(call-next-method)))
 
 ;;;code for generating the string constructor function
@@ -216,7 +217,8 @@ removed if no value is added."
             string)))))
 
 
-(defmacro defapi (name (endpoint request-class metaclass) docstring slots &rest class-options)
+(defmacro defapi (name (endpoint request-class metaclass) docstring slots
+                  &rest class-options)
   `(progn (defclass ,name (,request-class)
             ,slots
             ,@(append `((:metaclass ,metaclass)                        
@@ -267,7 +269,7 @@ removed if no value is added."
 (defmethod slot->json ((api api) slot)
   (let ((name (c2mop:slot-definition-name slot)))
     (cl-json:encode-object-member 
-     (or (and (slot-boundp slot 'name->json)(slot-value slot 'name->json))
+     (or (and (slot-boundp slot 'name->json) (slot-value slot 'name->json))
          (str:snake-case (string name)))
      (slot-value api name))))
 
@@ -283,6 +285,9 @@ removed if no value is added."
   (if (listp e)
       (first e)
       e))
+
+(defmethod endpoint ((api api))
+  (in-list (endpoint (class-of api))))
 
 (defmethod string-constructor ((api api))
   (string-constructor (class-of api)))
@@ -359,7 +364,9 @@ removed if no value is added."
 
 (defmethod generate-header-list ((api api) content)
   (let ((auth (generate-authorization-headers api)))
-    `(:headers ,auth :content content :use-connection-pool nil)))
+    (if content 
+        `(:headers ,auth :content ,content :use-connection-pool nil)
+        `(:headers ,auth :use-connection-pool nil))))
 
 (defmethod generate-header-list ((api %get) content)
   (declare (ignore content))
@@ -432,9 +439,11 @@ special condition defined in src/classes.lisp and signals."
                      (error 'api-no-connection :api-timeout-message "No network"
                                                :api-timeout-condition ,condition))
                    (condition (,condition);;total catchall oh well
-                     (handler-case 
-                         (signal-condition-from-response
-                          (jojo:parse (dexador.error:response-body ,condition)))
+                     (handler-case
+                         (progn 
+                           (break)
+                           (signal-condition-from-response
+                            (jojo:parse (dexador.error:response-body ,condition))))
                        (jojo:<jonathan-error> (,condition)
                          (error 'api-no-connection
                                 ;;if the server is down then this will end up
@@ -442,7 +451,6 @@ special condition defined in src/classes.lisp and signals."
                                 :api-timeout-message "Server probably down"
                                 :api-timeout-condition ,condition))))))))
          (try-again-restart fun)))))
-
 
 (defmethod slots-still-missing ((api api))
   (let* ((slots (c2mop:class-direct-slots (class-of api)))
@@ -452,8 +460,8 @@ special condition defined in src/classes.lisp and signals."
                required)))
 
 (defmethod execute-api-call ((api api) fun url args-plist)
-  (with-captured-dex-error
-    (apply fun url args-plist)))
+  ;; (with-captured-dex-error
+  (apply fun url args-plist))
 
 (defmethod print-object ((obj api) stream)
   (print-unreadable-object (obj stream :type t :identity t)
