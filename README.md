@@ -17,9 +17,96 @@ and then use `(call-api <your instance>)` to execute.
 txnId's are automatically added, so dont fill that slot. Make sure that you always provide :connection as an initarg otherwise you will get an error. 
 
 There is a little bit of thread safety with a connection object using `with-locked-connection` this is used when calling `password-login` and `logout` and every time a call is made that
-uses a txn the lock is grabbed to increment the lock and set it. Other than that there is 
-no other thread safety, however this is more than v1.
+uses a txn the lock is grabbed to increment the txn and set it that within in the call.
+Other than that there is no other thread safety, however this is more than v1.
 
+In theory when you use (call-api <obj>) it will error if you are missing some required values, it will also serialize slots are query parameters and path parameters correctly, 
+when you make the object you should be able to see if a required slot is missing in the 
+printed representation of the object in the REPL. You can also see the json, and the 
+potential url.
+
+You can resend the same event and the previous result will be overridden (results are stored in the slot res) and the txn will still be incremented.
+
+## A few examples
+```lisp
+CL-USER> (ql:quickload :lunamech-matrix-api)
+To load "lunamech-matrix-api":
+  Load 1 ASDF system:
+    lunamech-matrix-api
+; Loading "lunamech-matrix-api"
+
+(:LUNAMECH-MATRIX-API)
+CL-USER> (in-package #:lunamech-matrix-api/v2)
+#<PACKAGE "LUNAMECH-MATRIX-API/V2">
+LMAV2> (make-instance 'connection :url "https://"
+                                  :api "/_matrix/client/r0/" :username ""
+                                  :password "")
+#<CONNECTION 
+URL: ""
+Username: ""
+Logged in: NIL
+Auth: "Not authorized yet"
+Device-id: "No device ID yet"
+ {100C35A453}>
+LMAV2> (password-login *)
+#<CONNECTION 
+URL: "https://"
+Username: ""
+Logged in: T
+Auth: #<AUTH {100E4C88E3}>
+Device-id: "VIFOADZRRE"
+ {100C35A453}>
+LMAV2> 
+
+```
+
+### Sending a message to a room from repl 
+
+```lisp
+LMAV2> (multiple-value-bind (hash type)
+           (object%event/m-room-message "foobarquux")
+         (make-instance 'events%put-message-event-into-room
+                        :body hash
+                        :room-id "<the room id>"
+                        :event-type type
+                        :connection #v6))
+#<EVENTS%PUT-MESSAGE-EVENT-INTO-ROOM 
+PUT https://matrix.scyldings.com/_matrix/client/r0/rooms/%21Wom/send/m.room.message/0
+Content-Type: application/json; charset=utf-8
+JSON: {"msgtype":"m.text","body":"foobarquux"}
+MISSING: NONE {100FA9E78B}>
+LMAV2> (call-api *)
+(:|event_id| "$feWh-tyFUlqzJD0Gamaa0ndszoENf9F0GwJqe5CIChY")
+#<EVENTS%PUT-MESSAGE-EVENT-INTO-ROOM 
+PUT https://matrix./_matrix/client/r0/rooms/<the room id>/send/m.room.message/1
+Content-Type: application/json; charset=utf-8
+JSON: {"msgtype":"m.text","body":"foobarquux"}
+MISSING: NONE {100FA9E78B}>
+LMAV2> 
+```
+
+### Retracting that same event
+
+```lisp
+LMAV2> (make-instance 'events%redact-event
+                      :reason "Test"
+                      :room-id "!WJvFXSrAnfoqNgwqpE:scyldings.com"
+                      :event-id (getf * :|event_id|)
+                      :connection #v6)
+#<EVENTS%REDACT-EVENT 
+PUT https://matrix.scyldings.com/_matrix/client/r0/rooms/%2s.com/redact/%24feWh-tyFUlqzJD0Gamaa0ndszoENf9F0GwJqe5CIChY/1
+Content-Type: application/json; charset=utf-8
+JSON: {"reason":"Test"}
+MISSING: NONE {10042E8DDB}>
+LMAV2> (call-api *)
+(:|event_id| "$Z-19Wv6N1Xm21p0wFBHuqMI-XzWRtqQoX0Vy2GMEEFU")
+#<EVENTS%REDACT-EVENT 
+PUT https://matrix.scyldings.com/_matrix/client/r0/rooms/s.com/redact/%24feWh-tyFUlqzJD0Gamaa0ndszoENf9F0GwJqe5CIChY/2
+Content-Type: application/json; charset=utf-8
+JSON: {"reason":"Test"}
+MISSING: NONE {10042E8DDB}>
+LMAV2> 
+```
 
 # v1
 ## See api/user-api 
