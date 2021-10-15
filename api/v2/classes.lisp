@@ -4,6 +4,9 @@
   ((latest-sync
     :accessor latest-sync)))
 
+(defun %ql (name)
+  (cons name (bt:make-lock)))
+
 (defclass connection ()
   ((logged-in-p
     :initform nil
@@ -49,9 +52,33 @@
     :accessor encryption
     :type encryption
     :documentation "The slot used to store the associated encryption object")
+   (con-lock
+    :accessor con-lock
+    :initform (bt:make-lock)
+    :type bt:lock
+    :documentation "A lock for the connection")
    (device-id
     :accessor device-id
     :type string)))
+
+(defmacro with-locked-connection ((connection) &body body)
+  `(bt:with-lock-held ((con-lock ,connection))
+     (locally ,@body)))
+
+;; (slot-locks
+;;  :reader slot-locks
+;;  :initarg :slot-locks
+;;  :initform `(,(%ql 'logged-in-p),(%ql 'filters) ,(%ql 'url),(%ql 'api),(%ql 'username)
+;;              ,(%ql 'txn),(%ql 'user-id),(%ql 'password) ,(%ql 'auth) ,(%ql 'encryption)
+;;              ,(%ql 'encryption) ,(%ql 'device-id))
+;;  :documentation "A list of the locks for each slot.")))
+
+;; (defmethod c2mop:slot-value-using-class :around ((class connection) object slot)
+;;   (let* ((name (c2mop:slot-definition-name slot))
+;;          (lock (cdr (assoc name (slot-locks object)))))
+;;     (print "locking")
+;;     (bt:with-lock-held (lock)
+;;       (call-next-method))))
 
 (defmethod print-object ((connection connection) stream)
   (print-unreadable-object (connection stream :type t :identity t)

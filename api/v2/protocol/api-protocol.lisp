@@ -406,8 +406,9 @@ removed if no value is added."
                      (auth auth))
         connection
       (when (contains-txn-p api)
-        (setf (slot-value api 'lunamech-matrix-api/v2/api:txn)
-              (incf (txn (connection api)))))
+        (with-locked-connection ((connection api))
+          (setf (slot-value api 'lunamech-matrix-api/v2/api:txn)
+                (incf (txn (connection api))))))
       (let ((url (generate-url api))
             (header-list (generate-header-list api fun (generate-body api))))
         (setf (result api) (jojo:parse (execute-api-call api fun url header-list)))

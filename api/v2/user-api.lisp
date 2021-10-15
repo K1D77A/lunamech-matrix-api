@@ -17,24 +17,26 @@
                                :identifier (object%identifier-type/m-id-user username)
                                :initial-device-display-name username
                                :password password)))
-      (destructuring-bind (&key |access_token| |device_id| |user_id| &allow-other-keys)
-          (call-api call)
-        (when |device_id|
-          (setf device-id |device_id|))
-        (setf auth (make-instance 'auth :token |access_token|)
-              user-id |user_id|
-              logged-in-p t))
-      connection)))
+      (with-locked-connection (connection)
+        (destructuring-bind (&key |access_token| |device_id| |user_id| &allow-other-keys)
+            (call-api call)
+          (when |device_id|
+            (setf device-id |device_id|))
+          (setf auth (make-instance 'auth :token |access_token|)
+                user-id |user_id|
+                logged-in-p t))))
+    connection))
 
 (defun logout (connection)
   (with-accessors ((logged-in-p logged-in-p)
                    (auth auth))
       connection
-    (let ((call (make-instance 'lunamech-matrix-api/v2/api:logout-connection
-                               :connection connection)))
-      (call-api call)
-      (setf logged-in-p nil)
-      (slot-makunbound connection 'auth))
+    (with-locked-connection (connection)
+      (let ((call (make-instance 'lunamech-matrix-api/v2/api:logout-connection
+                                 :connection connection)))
+        (call-api call)
+        (setf logged-in-p nil)
+        (slot-makunbound connection 'auth)))
     connection))
 
 (defun send-message-to-room (connection room-id message)
