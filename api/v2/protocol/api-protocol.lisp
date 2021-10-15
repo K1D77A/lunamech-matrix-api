@@ -128,7 +128,7 @@ follow a different scheme.
 (defun cleaned-slot-name (slot)
   (symbol-name (c2mop:slot-definition-name slot)))
 
-(defun %find-encoders-for-syms (sym-string-list slots)
+(defun %find-encoders-for-syms (sym-string-list effective direct)
   "Maps over SYM-STRING-LIST which is a mix of symbols and strings, if its a string
 returns `(list ,string) if it is a symbol then looks for the slot with the name 
 ,entry and the returns `(cons ,entry ,(encoder slot)), this final accumulated list is 
@@ -137,10 +137,15 @@ returned."
           (mapcar (lambda (entry)
                     (if (stringp entry)
                         `,entry
-                        (let ((slot (find entry slots :key #'cleaned-slot-name
-                                                      :test #'string-equal)))
-                          slot)))
+                        (let ((effective (find entry effective :key #'cleaned-slot-name
+                                                               :test #'string-equal))
+                              (direct (find entry direct :key #'cleaned-slot-name
+                                                         :test #'string-equal)))
+                          (or (and effective direct)
+                              (error "both slot and direct need to be bound."))
+                          (list :effective effective :direct direct))))
                   sym-string-list)))
+
 
 (defun %upcase-and-intern-starting-with (start list)
   "If a string in LIST starts with START then interns and upcases it with START removed.
@@ -150,19 +155,6 @@ START should be a string of len 1."
                 (intern (string-upcase (subseq string 1)))
                 string))
           list))
-
-(defun %filter-syms-not-assoc-with-slots (list-of-syms slots)
-  "Removes symbols from LIST-OF-SYMS that do not have associated names in SLOTS."
-  (remove-if #'null
-             (mapcar (lambda (sym) (find sym slots :key #'c2mop:slot-definition-name))
-                     list-of-syms)))
-
-(defun %construct-lambda-list (required-vars optional-vars)
-  "Constructs a lambda list from the two lists of symbols REQUIRED-VARS and OPTIONAL-VARS."
-  (append required-vars (if optional-vars '(&optional) nil)
-          (mapcar (lambda (name)
-                    (list name nil))
-                  optional-vars)))
 
 (defun compose-string-into-lambda (class string)
   "Takes a string like 'foo/:bar/quux and returns a function with N arguments where 
@@ -182,18 +174,30 @@ removed if no value is added."
         (let* ((split (str:split #\/ string))                 
                (replaced-with-syms (%upcase-and-intern-starting-with ":" split))
                (syms-assoc-encoders (%find-encoders-for-syms replaced-with-syms
-                                                             required-effective-slots)))
+                                                             required-effective-slots
+                                                             direct-slots)))
           (when (find ":txn" split :test #'string-equal)
             (setf (contains-txn-p class) t))
           (compile nil `(lambda (api)
                           (let ((strings
-                                  (mapcar (lambda (e)
-                                            (etypecase e
-                                              (string e)
-                                              (c2mop:slot-definition
-                                               (c2cl:slot-value-using-class ,class api e))))
-                                          ',syms-assoc-encoders)))
-                            (format nil "~{~A~^/~}" strings)))))                        
+                                  (mapcar
+                                   (lambda (e)
+                                     (etypecase e
+                                       (string e)
+                                       (list
+                                        (destructuring-bind (&key effective direct)
+                                            e 
+                                          (let ((val
+                                                  (c2mop:slot-value-using-class
+                                                   ,class api effective))
+                                                (encoder? (encoder direct)))
+                                            (if encoder?
+                                                (etypecase val
+                                                  (string (funcall encoder? val))
+                                                  (number val))
+                                                val))))))
+                                   ',syms-assoc-encoders)))
+                            (format nil "~{~A~^/~}" strings)))))
         (lambda (api)
           (declare (ignore api))
           string))))
@@ -210,7 +214,7 @@ removed if no value is added."
             (with-slots (string-constructor endpoint)
                 class 
               (setf string-constructor
-                    (compose-string-into-lambda class  (in-list endpoint)))))))
+                    (compose-string-into-lambda class (in-list endpoint)))))))
 
 (defmacro defapi%post (name (endpoint) docstring slots &rest class-options)
   `(defapi ,name (,endpoint) ,docstring ,slots ,@(append class-options
