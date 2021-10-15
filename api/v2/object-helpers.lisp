@@ -24,6 +24,10 @@
                  ("phone" . ,phone))))
 
 (defun object%event/m-room-redaction (reason)
-  (values 
-   (%quick-hash `(("reason" . ,reason)))
-   "m.room.redaction"))
+  (values (%quick-hash `(("reason" . ,reason))) "m.room.redaction"))
+
+(defun object%event/m-room-message (message)
+  (values (%quick-hash `(("msgtype" . "m.text")
+                         ("body" . ,message)))
+          "m.room.message"))
+

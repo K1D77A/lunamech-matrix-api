@@ -74,14 +74,13 @@ follow a different scheme.
   (call-next-method))
 
 (defmethod c2mop:compute-slots ((class api-call))
-  (with-slots (string-constructor endpoint required-slots special-slot)
-      class
-    (multiple-value-bind (fun slots)
-        (compose-string-into-lambda class (in-list endpoint))
-      (setf string-constructor fun
-            required-slots slots
-            special-slot (find-special-slot class))
-      (call-next-method))))
+  (if (eql (class-name class) 'api)
+      (call-next-method)
+      (with-slots (string-constructor endpoint required-slots special-slot)
+          class        
+        (setf required-slots (remove-if-not #'requiredp (c2mop:class-direct-slots class))
+              special-slot (find-special-slot class))
+        (call-next-method))))
 
 (defmethod find-special-slot ((class api-call))
   (with-slots (special-slot specialp)
@@ -101,7 +100,6 @@ follow a different scheme.
 (defun url-e (url)
   (do-urlencode:urlencode url))
 
-
 (defclass api ()
   ((connection
     :reader connection
@@ -117,30 +115,13 @@ follow a different scheme.
   (:metaclass api-call)
   (:documentation "The top level class for all API call objects."))
 
-(defclass %post (api)
-  ()
-  (:metaclass api-call))
-
-(defclass %get (api)
-  ()
-  (:metaclass api-call))
-
-(defclass %delete (api)
-  ()
-  (:metaclass api-call))
-
-(defclass %put (api)
-  ()
-  (:metaclass api-call))
-
 (defmethod initialize-instance :after ((class api) &rest initargs)
   (handler-case (connection class)
     (condition (c)
-      (error 'connection-unbound :message "Connection is unbound."))))
-;; (with-slots (string-constructor)
-;;     (class-of class)
-;;   (c2mop:set-funcallable-instance-function class (lambda () (funcall #'call-api class)))))
-;;(call-next-method)))
+      (error 'connection-unbound :message "Connection is unbound.")))
+  (when (contains-txn-p class)
+    (setf (slot-value class 'lunamech-matrix-api/v2/api:txn)
+          (txn (connection class)))))
 
 ;;;code for generating the string constructor function
 
@@ -152,14 +133,14 @@ follow a different scheme.
 returns `(list ,string) if it is a symbol then looks for the slot with the name 
 ,entry and the returns `(cons ,entry ,(encoder slot)), this final accumulated list is 
 returned."
-  (mapcar (lambda (entry)
-            (print entry)
-            (if (stringp entry)
-                `(list ,entry)
-                (let ((slot (find entry slots :key #'cleaned-slot-name
-                                              :test #'string-equal)))
-                  `(cons ,(c2mop:slot-definition-name slot) ,(encoder slot)))))
-          sym-string-list))
+  (remove #'null
+          (mapcar (lambda (entry)
+                    (if (stringp entry)
+                        `,entry
+                        (let ((slot (find entry slots :key #'cleaned-slot-name
+                                                      :test #'string-equal)))
+                          slot)))
+                  sym-string-list)))
 
 (defun %upcase-and-intern-starting-with (start list)
   "If a string in LIST starts with START then interns and upcases it with START removed.
@@ -192,60 +173,61 @@ encoder, if there is then it encodes that argument with that single argument fun
 Also checks if the argument is optional, if it is optional then it is added as an 
 &optional argument to the returned function with a default argument of nil, this is 
 removed if no value is added."
-  (flet ((slot-name (slot) (c2mop:slot-definition-name slot)))
-    (let ((class-slots (c2mop:class-direct-slots class)))
-      (if (some #'in-url-p class-slots)
-          (let* ((split (str:split #\/ string))
-                 (replaced-with-syms (%upcase-and-intern-starting-with ":" split))
-                 (syms-assoc-encoders (%find-encoders-for-syms replaced-with-syms
-                                                               class-slots))
-                 (lambda-list (remove-if-not #'symbolp replaced-with-syms))
-                 (filtered-slots (%filter-syms-not-assoc-with-slots lambda-list class-slots))
-                 (optional-slots (remove-if #'requiredp filtered-slots))
-                 (required-slots (remove-if-not #'requiredp filtered-slots))
-                 (o-names (mapcar #'slot-name optional-slots))
-                 (r-names (mapcar #'slot-name required-slots))
-                 (final-lambda-list (%construct-lambda-list r-names o-names)))       
-            (values     
-             (compile nil
-                      `(lambda ,final-lambda-list
-                         (format nil "~{~A~^/~}"
-                                 (mapcar (lambda (list)
-                                           (let ((str-or-sym (car list))
-                                                 (encoder? (cdr list)))
-                                             (if encoder?
-                                                 (if (stringp str-or-sym)
-                                                     (funcall encoder? str-or-sym)
-                                                     str-or-sym)
-                                                 str-or-sym)))
-                                         (remove-if #'null (list ,@syms-assoc-encoders)
-                                                    :key #'car)))))
-             lambda-list))
-          (lambda ()
-            string)))))
+  (let* ((direct-slots (remove-if-not #'in-url-p (c2mop:class-direct-slots class)))
+         (required-effective-slots (intersection (c2mop:class-slots class)
+                                                 direct-slots 
+                                                 :key #'c2mop:slot-definition-name
+                                                 :test #'string-equal)))
+    (if direct-slots 
+        (let* ((split (str:split #\/ string))                 
+               (replaced-with-syms (%upcase-and-intern-starting-with ":" split))
+               (syms-assoc-encoders (%find-encoders-for-syms replaced-with-syms
+                                                             required-effective-slots)))
+          (when (find ":txn" split :test #'string-equal)
+            (setf (contains-txn-p class) t))
+          (compile nil `(lambda (api)
+                          (let ((strings
+                                  (mapcar (lambda (e)
+                                            (etypecase e
+                                              (string e)
+                                              (c2mop:slot-definition
+                                               (c2cl:slot-value-using-class ,class api e))))
+                                          ',syms-assoc-encoders)))
+                            (format nil "~{~A~^/~}" strings)))))                        
+        (lambda (api)
+          (declare (ignore api))
+          string))))
 
-
-(defmacro defapi (name (endpoint request-class metaclass) docstring slots
+(defmacro defapi (name (endpoint) docstring slots
                   &rest class-options)
-  `(progn (defclass ,name (,request-class)
-            ,slots
-            ,@(append `((:metaclass ,metaclass)                        
-                        (:endpoint ,endpoint)
-                        (:documentation ,docstring))
-               class-options))
-          (c2mop:ensure-finalized (find-class ',name))))
+  `(progn (let ((class (defclass ,name (api)
+                         ,slots
+                         ,@(append `((:metaclass api-call)                        
+                                     (:endpoint ,endpoint)
+                                     (:documentation ,docstring))
+                            class-options))))
+            (c2mop:ensure-finalized class)
+            (with-slots (string-constructor endpoint)
+                class 
+              (setf string-constructor
+                    (compose-string-into-lambda class  (in-list endpoint)))))))
 
 (defmacro defapi%post (name (endpoint) docstring slots &rest class-options)
-  `(defapi ,name (,endpoint %post api-call%post) ,docstring ,slots ,@class-options))
+  `(defapi ,name (,endpoint) ,docstring ,slots ,@(append class-options
+                                                         '((:request-fun dexador:post)))))
 
 (defmacro defapi%get (name (endpoint) docstring slots &rest class-options)
-  `(defapi ,name (,endpoint %get api-call%get)  ,docstring ,slots ,@class-options))
+  `(defapi ,name (,endpoint)  ,docstring ,slots ,@(append class-options
+                                                          '((:request-fun dexador:get)))))
 
 (defmacro defapi%put (name (endpoint) docstring slots &rest class-options)
-  `(defapi ,name (,endpoint %put api-call%put) ,docstring ,slots ,@class-options))
+  `(defapi ,name (,endpoint) ,docstring ,slots ,@(append class-options
+                                                         '((:request-fun dexador:put)))))
 
 (defmacro defapi%delete (name (endpoint) docstring slots &rest class-options)
-  `(defapi ,name (,endpoint %delete api-call%delete) ,docstring ,slots ,@class-options))
+  `(defapi ,name (,endpoint) ,docstring ,slots
+           ,@(append class-options
+                     '((:request-fun dexador:delete)))))
 
 (defmethod validate-slot-for-sending ((api api) slot)
   (with-accessors ((requiredp requiredp))
@@ -297,6 +279,9 @@ removed if no value is added."
 
 (defmethod endpoint ((api api))
   (in-list (endpoint (class-of api))))
+
+(defmethod contains-txn-p ((api api))
+  (in-list (contains-txn-p (class-of api))))
 
 (defmethod string-constructor ((api api))
   (string-constructor (class-of api)))
@@ -369,16 +354,14 @@ removed if no value is added."
       (generate-body%special api)
       (generate-body%normal api)))
 
-(defmethod generate-header-list ((api api) content)
+(defgeneric generate-header-list (api fun content)
+  (:documentation "Generates the header list for an api call"))
+
+(defmethod generate-header-list ((api api) fun content)
   (let ((auth (generate-authorization-headers api)))
     (if content 
         `(:headers ,auth :content ,content :use-connection-pool nil)
         `(:headers ,auth :use-connection-pool nil))))
-
-(defmethod generate-header-list ((api %get) content)
-  (declare (ignore content))
-  (let ((auth (generate-authorization-headers api)))
-    `(:headers ,auth :use-connection-pool nil)))
 
 (defmethod all-query-param-slots (slots)
   (remove-if-not #'query-param-p slots))
@@ -390,7 +373,7 @@ removed if no value is added."
 (defmethod query-param-slot->string ((api api) slot)
   (with-accessors ((name->json name->json))
       slot
-    (let ((name  (c2mop:slot-definition-name slot)))
+    (let ((name (c2mop:slot-definition-name slot)))
       (format nil "~A=~A" (if name->json name->json (str:snake-case (correct-encode name)))
               (correct-encode (slot-value api name))))))
 
@@ -405,7 +388,7 @@ removed if no value is added."
     (format nil "?~{~A~^&~}" strings)))
 
 (defmethod generate-url ((api api))
-  (let ((end (apply (string-constructor api) (values-for-required api)))
+  (let ((end (funcall (string-constructor api) api))
         (query-slots (bound-query-param-slots api)))
     (concatenate 'string (url (connection api)) (api api) end
                  (if query-slots
@@ -418,8 +401,11 @@ removed if no value is added."
     (with-accessors ((url url)
                      (auth auth))
         connection
+      (when (contains-txn-p api)
+        (setf (slot-value api 'lunamech-matrix-api/v2/api:txn)
+              (incf (txn (connection api)))))
       (let ((url (generate-url api))
-            (header-list (generate-header-list api (generate-body api))))
+            (header-list (generate-header-list api fun (generate-body api))))
         (setf (result api) (jojo:parse (execute-api-call api fun url header-list)))
         (values (result api) api)))))
 

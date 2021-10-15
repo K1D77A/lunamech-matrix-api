@@ -27,6 +27,7 @@
                 :description "Version 2 of the API library."
                 :serial t
                 :components ((:file "package")
+                             (:file "api-package")
                              (:module "protocol"
                               :description "The MOP protocol"
                               :serial t
@@ -35,7 +36,6 @@
                                            (:file "api-protocol")))
                              (:file "classes")
                              (:file "conditions")
-                             (:file "api-package")
                              (:module "2"
                               :serial t
                               :components ((:file "api")))

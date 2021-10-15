@@ -27,6 +27,12 @@
     :accessor username
     :type string
     :initarg :username)
+   (txn
+    :accessor txn
+    :initarg :txn
+    :initform 0 
+    :type fixnum
+    :documentation "An auto incrementing Txn id")
    (user-id
     :accessor user-id
     :initarg :user-id

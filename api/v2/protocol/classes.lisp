@@ -107,6 +107,10 @@
     :initform "application/json; charset=utf-8"
     :documentation "Change to a symbol and that slot will be used for the content type 
 instead")
+   (contains-txn-p
+    :accessor contains-txn-p
+    :initform nil
+    :documentation "When set to t then TXN is taken from connection when executed.")
    (specialp
     :reader specialp
     :initarg :specialp
@@ -114,17 +118,5 @@ instead")
    (special-slot
     :reader special-slot
     :initform nil)))
-
-(defclass api-call%post (api-call)
-  ((request-fun :initform #'dexador:post)))
-
-(defclass api-call%get (api-call)
-  ((request-fun :initform #'dexador:get)))
-
-(defclass api-call%delete (api-call) 
-  ((request-fun :initform #'dexador:delete)))
-
-(defclass api-call%put (api-call)
-  ((request-fun :initform #'dexador:put)))
 
 

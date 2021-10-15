@@ -17,8 +17,6 @@
                                :identifier (object%identifier-type/m-id-user username)
                                :initial-device-display-name username
                                :password password)))
-      (print call)
-      (break)
       (destructuring-bind (&key |access_token| |device_id| |user_id| &allow-other-keys)
           (call-api call)
         (when |device_id|
@@ -40,32 +38,25 @@
     connection))
 
 (defun send-message-to-room (connection room-id message)
-  (make-instance 'lunamech-matrix-api/v2/api:events%put-message-event-into-room
-                 :body
-                 (%quick-hash
-                  `(("msgtype" . "m.text")
-                    ("body" . ,message)))
-                 :room-id room-id
-                 :txn (random 34857245)
-                 :event-type "m.room.message" :connection connection))
+  (multiple-value-bind (hash type)
+      (object%event/m-room-message message)
+    (send-event-to-room connection room-id type hash)))
 
 (defun send-event-to-room (connection room-id event-type event)
   (make-instance 'lunamech-matrix-api/v2/api:events%put-message-event-into-room
                  :body event 
                  :room-id room-id
-                 :txn (random 34857245)
                  :event-type event-type
                  :connection connection))
 
 (defun redact-event-in-room (connection room-id event-id reason)
-  (make-instance 'lunamech-matrix-api/v2/api:events%redact-event
-                 :reason reason
-                 :room-id room-id
-                 :event-id event-id
-                 :txn (random 1383574)
-                 :connection connection))
-      
-  
+  (call-api (make-instance 'lunamech-matrix-api/v2/api:events%redact-event
+                           :reason reason
+                           :room-id room-id
+                           :event-id event-id
+                           :connection connection)))
+
+
 
 
 
