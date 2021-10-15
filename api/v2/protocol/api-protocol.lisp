@@ -363,7 +363,7 @@ removed if no value is added."
 
 (defmethod generate-header-list ((api api) fun content)
   (let ((auth (generate-authorization-headers api)))
-    (if content 
+    (if (string/= content "{}")
         `(:headers ,auth :content ,content :use-connection-pool nil)
         `(:headers ,auth :use-connection-pool nil))))
 
@@ -372,7 +372,11 @@ removed if no value is added."
 
 (defmethod bound-query-param-slots ((api api))
   (let ((slots (all-query-param-slots (c2mop:class-direct-slots (class-of api)))))
-    (remove-if-not (lambda (slot) (slot-boundp api (c2mop:slot-definition-name slot))) slots)))
+    (remove-if-not (lambda (slot)
+                     (let ((boundp (slot-boundp api (c2mop:slot-definition-name slot))))
+                       (when boundp 
+                         (slot-value api (c2mop:slot-definition-name slot)))))
+                   slots)))
 
 (defmethod query-param-slot->string ((api api) slot)
   (with-accessors ((name->json name->json))
@@ -414,7 +418,8 @@ removed if no value is added."
                 (incf (txn (connection api))))))
       (let ((url (generate-url api))
             (header-list (generate-header-list api fun (generate-body api))))
-        (setf (result api) (jojo:parse (execute-api-call api fun url header-list)))
+        (setf (result api) (jojo:parse
+                            (execute-api-call api fun url header-list)))
         (values (result api) api)))))
 
 (defmacro with-captured-dex-error (&body body)

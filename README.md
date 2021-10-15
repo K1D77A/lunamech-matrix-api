@@ -4,7 +4,7 @@ Basic implementation of the Matrix API used in [LunaMech](https://github.com/K1D
 
 # v2
 V2 is under active development while v1 is now in maintenance only mode.
-Currently v2 wraps every call in the spec, the spaces api and every call in the synapse admin api.
+Currently v2 wraps every call in the client-server spec, the spaces api and every call in the synapse admin api.
 
 The package is :lunamech-matrix-api/v2.
 ## see api/v2/user-api.lisp for some thin wrappers
@@ -26,6 +26,12 @@ printed representation of the object in the REPL. You can also see the json, and
 potential url.
 
 You can resend the same event and the previous result will be overridden (results are stored in the slot res) and the txn will still be incremented.
+
+cl-json is used to encode all json (body) values. 
+
+When encoding query params nil and unbound slots are ignored, if you want something like 'false' then set the slot to false. 
+
+Some api calls are 'special' and will have one slot that is declared specialp this just means that the content of this slot is encoded to json and sent rather than the normal slots, if you fail to fill a special slot a condition will be signalled.
 
 ## A few examples
 ```lisp

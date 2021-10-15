@@ -254,7 +254,7 @@
               :initarg :server
               :query-param-p t))
             (:rate-limited-p nil)
-            (:requires-auth-p nil))
+            (:requires-auth-p t))
 
 (defapi%post rooms%public-rooms/filtered ("publicRooms")
              "List the public rooms on the server with optional filter"
