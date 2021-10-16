@@ -13,8 +13,8 @@
               (enable-renewal-emails
                :accessor enable-renewal-emails
                :initarg :enable-renewal-emails
-               :initform "false"
-               :one-of ("true" "false")
+               :initform nil
+               :one-of (t nil)
                :requiredp t))
              (:api "/_synapse/admin/v1/")
              (:requires-auth-p t)
@@ -201,8 +201,8 @@
               (keep-profiles 
                :accessor keep-profiles
                :initarg :keep-profiles 
-               :initform "true"
-               :one-of ("true" "false")
+               :initform t
+               :one-of (t nil)
                :query-param-p t
                :requiredp nil))
              (:api "/_synapse/admin/v1/")
@@ -234,8 +234,8 @@ Note that Synapse requires at least one message in each room, so it will never d
               (delete-local-events
                :accessor delete-local-events
                :initarg :delete-local-events
-               :initform "false"
-               :one-of ("true" "false")
+               :initform nil
+               :one-of (t nil)
                :requiredp nil)
               (purge-up-to-event-id
                :accessor purge-up-to-event-id
@@ -284,9 +284,9 @@ Note that Synapse requires at least one message in each room, so it will never d
               (admin
                :accessor admin
                :initarg :admin
-               :initform "false"
+               :initform t
                :requiredp t
-               :one-of ("true" "false"))
+               :one-of (t nil))
               (mac
                :accessor mac
                :initarg :mac
@@ -484,17 +484,17 @@ Note that Synapse requires at least one message in each room, so it will never d
                  :accessor block-room
                  :initarg block-room
                  :name->json "block"
-                 :initform "false"
+                 :initform nil
                  :requiredp nil)
                 (purge
                  :accessor purge
                  :initarg :purge
-                 :initform "true"
+                 :initform t
                  :requiredp nil)
                 (force-purge
                  :accessor force-purge
                  :initarg :force-purge
-                 :initform "false"
+                 :initform nil
                  :requiredp nil))
                (:api "/_synapse/admin/v1/")
                (:requires-auth-p t)
@@ -714,12 +714,12 @@ Note that Synapse requires at least one message in each room, so it will never d
              (admin
               :accessor admin
               :initarg :admin
-              :initform "false"
+              :initform t
               :requiredp nil)
              (deactivated
               :accessor deactivated
               :initarg :deactivated
-              :initform "false"
+              :initform nil
               :requiredp nil))
             (:api "/_synapse/admin/v2/")
             (:requires-auth-p t)
@@ -802,7 +802,7 @@ Note that Synapse requires at least one message in each room, so it will never d
               (erase
                :accessor erase
                :initarg :erase
-               :initform "true"
+               :initform t
                :requiredp t))
              (:api "/_synapse/admin/v1/")
              (:requires-auth-p t)
@@ -818,7 +818,7 @@ Note that Synapse requires at least one message in each room, so it will never d
               (logout-devices
                :accessor logout-devices
                :initarg :logout-devices
-               :initform "true"
+               :initform t
                :requiredp t)
               (new-password 
                :accessor new-password 
@@ -850,7 +850,7 @@ Note that Synapse requires at least one message in each room, so it will never d
              (admin
               :accessor admin
               :initarg :admin
-              :initform "true"
+              :initform t
               :requiredp t))
             (:api "/_synapse/admin/v1/")
             (:requires-auth-p t)

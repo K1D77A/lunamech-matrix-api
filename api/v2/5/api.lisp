@@ -68,7 +68,7 @@
               (inhibit-login
                :accessor inhibit-login
                :initarg :inhibit-login
-               :initform "false"))
+               :initform nil))
              (:rate-limited-p t)
              (:requires-auth-p nil))
 

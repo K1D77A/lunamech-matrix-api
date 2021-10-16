@@ -107,15 +107,6 @@ the MOP to check if a slot is bound and will only convert bound slots."
                          (as-string (string-downcase (symbol-name slot-name))))
                     (jojo:write-key-value as-string (slot-value obj slot-name)))))))
 
-(defmethod add-user-room-filter (connection user-id (filter filter-request))
-  (auth-req (:post-object connection ("user/" user-id "/filter")
-             (jojo:to-json filter)
-             resp)
-    resp))
 
-(defmethod add-user-room-filter (connection user-id (filter list))
-  (let ((filter (filter-list->filter-request filter)))
-    (add-user-room-filter connection user-id filter)))
-  
 
 

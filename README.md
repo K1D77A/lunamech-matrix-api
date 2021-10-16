@@ -6,6 +6,26 @@ Basic implementation of the Matrix API used in [LunaMech](https://github.com/K1D
 V2 is under active development while v1 is now in maintenance only mode.
 Currently v2 wraps every call in the client-server spec, the spaces api and every call in the synapse admin api.
 
+# Important notes
+
+When using an api call like
+```lisp
+(make-instance 'rooms%public-rooms/filtered :connection #v13 :include-all-networks nil)
+```
+Make sure you check the API documentation to see which slot does what because boolean query parameters are "true" | "false" while the boolean values for json body parameters are t | nil. You might be able to workout which is from the initial value, if its "false" | "true" you know its a query param. Maybe I will implement a translator at some point for the query params.
+
+in `object-helpers.lisp` there are a variety of objects constructed using keyword arguments,
+all arguments that default to :ne mean "no encode".
+
+```lisp
+(defun object%room-filter (&key (not-rooms :ne)(rooms :ne)(ephemeral :ne)
+                             (include-leave :ne)(state :ne)(timeline :ne)
+                             (account-data :ne))
+  (%quick-hash `(("not_rooms" . ,not-rooms)("rooms" . ,rooms)("ephemeral" . ,ephemeral)
+                 ("include_leave" . ,include-leave)("state" . ,state)("timeline" . ,timeline)
+                 ("account_data" . ,account-data))))
+```
+
 The package is :lunamech-matrix-api/v2.
 ## see api/v2/user-api.lisp for some thin wrappers
 ## see api/v2/object-helpers.lisp for some Matrix object wrappers

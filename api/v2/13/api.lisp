@@ -36,7 +36,7 @@
              (typing
               :accessor typing
               :initarg :typing
-              :initform "true"
+              :initform t
               :requiredp t)
              (timeout
               :accessor timeout
@@ -424,7 +424,7 @@
                :accessor append-bool
                :initarg :append-bool
                :name->json "append"
-               :initform "false"))
+               :initform nil))
              (:rate-limited-p t)
              (:requires-auth-p t))
 

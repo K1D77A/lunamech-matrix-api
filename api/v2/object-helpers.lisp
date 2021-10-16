@@ -6,10 +6,15 @@
     (mapc (lambda (alist)
             (destructuring-bind (a . b)
                 alist
-              (when b
+              (unless (eq b :ne)
                 (setf (gethash a hashtable) b))))
           alist)
     hashtable))
+
+(defun %clean-alist (alist)
+  (loop :for (a . b) :on alist
+        :when (not (eq b :ne))
+          :appending (cons a b)))
 
 (defun object%identifier-type/m-id-user (user)
   (%quick-hash `(("type" . "m.id.user")("user" . ,user))))
@@ -39,24 +44,24 @@
                          ("formatted_body" . ,formatted-body)))
           "m.room.message"))
 
-(defun object%image-info (&key (h nil) (w nil) (mimetype nil)
-                            (size nil) (thumbnail-url nil) (thumbnail-file nil)
-                            (thumbnail-info nil))
+(defun object%image-info (&key (h :ne) (w :ne) (mimetype :ne)
+                            (size :ne) (thumbnail-url :ne) (thumbnail-file :ne)
+                            (thumbnail-info :ne))
   (%quick-hash `(("h" . ,h)("w" . ,w)("mimetype" . ,mimetype)("size" . ,size)
                  ("thumbnail_url" . ,thumbnail-url)("thumbnail_file" . ,thumbnail-file)
                  ("thumbnail_info" . ,thumbnail-info))))
 
-(defun object%file-info (&key (mimetype nil) (size nil) (thumbnail-url nil)
-                           (thumbnail-file nil)
-                           (thumbnail-info nil))
+(defun object%file-info (&key (mimetype :ne) (size :ne) (thumbnail-url :ne)
+                           (thumbnail-file :ne)
+                           (thumbnail-info :ne))
   (%quick-hash `(("mimetype" . ,mimetype)("size" . ,size)
                  ("thumbnail_url" . ,thumbnail-url)("thumbnail_file" . ,thumbnail-file)
                  ("thumbnail_info" . ,thumbnail-info))))
 
-(defun object%thumbnail-info (&key (h nil) (w nil) (mimetype nil) (size nil))
+(defun object%thumbnail-info (&key (h :ne) (w :ne) (mimetype :ne) (size :ne))
   (%quick-hash `(("h" . ,h)("w" . ,w)("mimetype" . ,mimetype)("size" . ,size))))
 
-(defun object%event/m-room-message/m-image (&key (body nil) (info nil) (url nil) (file nil))
+(defun object%event/m-room-message/m-image (&key (body :ne) (info :ne) (url :ne) (file :ne))
   (or (or url file) (error "url must be set if not encrypted, file if encrypted."))
   (values (%quick-hash `(("body" . ,body)
                          ("info" . ,info)
@@ -64,4 +69,37 @@
                          ("msgtype" . "m.image")
                          ("file" . ,file)))
           "m.room.message"))
+
+(defun object%event-filter (&key (limit :ne) (not-senders :ne)
+                              (not-types :ne) (senders :ne)
+                              (types :ne))
+  (%quick-hash `(("limit" . ,limit) ("not_senders" . ,not-senders)
+                 ("not_types" . ,not-types)("senders" . ,senders)
+                 ("types" . ,types))))
+
+(defun object%room-filter (&key (not-rooms :ne)(rooms :ne)(ephemeral :ne)
+                             (include-leave :ne)(state :ne)(timeline :ne)
+                             (account-data :ne))
+  (%quick-hash `(("not_rooms" . ,not-rooms)("rooms" . ,rooms)("ephemeral" . ,ephemeral)
+                 ("include_leave" . ,include-leave)("state" . ,state)("timeline" . ,timeline)
+                 ("account_data" . ,account-data))))
+
+(defun object%state-filter (&key (limit :ne) (not-senders :ne)
+                              (not-types :ne) (senders :ne)
+                              (types :ne) (lazy-load-members :ne)
+                              (include-redundant-members :ne)
+                              (not-rooms :ne)
+                              (rooms :ne)
+                              (contains-url :ne))
+  (%quick-hash `(("limit" . ,limit) ("not_senders" . ,not-senders)
+                 ("not_types" . ,not-types)("senders" . ,senders)
+                 ("types" . ,types)("not_rooms" . ,not-rooms)("rooms" . ,rooms)
+                 ("contains_url" . ,contains-url)("lazy_load_members" . ,lazy-load-members)
+                 ("include_redundant_members" . ,include-redundant-members))))
+
+(defun object%room-event-filter (&rest keys &key &allow-other-keys)
+  "See object%state-filter for options."
+  (apply #'object%state-filter keys))
+
+
 
