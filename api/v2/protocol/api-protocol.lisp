@@ -363,9 +363,15 @@ removed if no value is added."
 
 (defmethod generate-header-list ((api api) fun content)
   (let ((auth (generate-authorization-headers api)))
-    (if (string/= content "{}")
-        `(:headers ,auth :content ,content :use-connection-pool nil)
-        `(:headers ,auth :use-connection-pool nil))))
+    `(:headers ,auth :content ,content :use-connection-pool nil)))
+
+(defmethod generate-header-list ((api api) (fun (eql 'dexador:get)) content)
+  (let ((auth (generate-authorization-headers api)))
+    `(:headers ,auth :use-connection-pool nil)))
+
+(defmethod generate-header-list ((api api) (fun (eql 'dexador:delete)) content)
+  (let ((auth (generate-authorization-headers api)))
+    `(:headers ,auth :use-connection-pool nil)))
 
 (defmethod all-query-param-slots (slots)
   (remove-if-not #'query-param-p slots))

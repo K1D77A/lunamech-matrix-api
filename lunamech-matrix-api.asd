@@ -69,5 +69,6 @@
                               :serial t
                               :components ((:file "api")))
                              (:file "object-helpers")
+                             (:file "integration")
                              (:file "sync")
                              (:file "user-api")))))
