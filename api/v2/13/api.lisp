@@ -152,6 +152,7 @@
               :query-param-p t
               :initform "true"))
             (:api "/_matrix/media/r0/")
+            (:do-not-decode-p t)
             (:rate-limited-p t)
             (:requires-auth-p nil))
 
@@ -178,6 +179,7 @@
               :query-param-p t
               :initform "true"))
             (:api "/_matrix/media/r0/")
+            (:do-not-decode-p t)            
             (:rate-limited-p t)
             (:requires-auth-p nil))
 
@@ -216,6 +218,7 @@
               :query-param-p t
               :requiredp nil))
             (:api "/_matrix/media/r0/")
+            (:do-not-decode-p t)
             (:rate-limited-p t)
             (:requires-auth-p nil))
 

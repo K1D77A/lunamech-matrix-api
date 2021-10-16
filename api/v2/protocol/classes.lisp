@@ -80,6 +80,11 @@
     :accessor endpoint
     :initarg :endpoint
     :documentation "A URL with :<slot-name> within where the slot value is encoded.")
+   (do-not-decode-p
+     :accessor do-not-decode-p
+     :initarg :do-not-decode-p
+     :initform nil
+     :documentation "Set to t and this will not be parsed as json.")
    (api
     :accessor api
     :initarg :api

@@ -290,6 +290,9 @@ removed if no value is added."
 (defmethod string-constructor ((api api))
   (string-constructor (class-of api)))
 
+(defmethod do-not-decode-p ((api api))
+  (in-list (do-not-decode-p (class-of api))))
+
 (defmethod request-type ((api api))
   (in-list (request-type (class-of api))))
 
@@ -424,8 +427,10 @@ removed if no value is added."
                 (incf (txn (connection api))))))
       (let ((url (generate-url api))
             (header-list (generate-header-list api fun (generate-body api))))
-        (setf (result api) (jojo:parse
-                            (execute-api-call api fun url header-list)))
+        (setf (result api)
+              (if (do-not-decode-p api)
+                  (execute-api-call api fun url header-list)
+                  (jojo:parse (execute-api-call api fun url header-list))))
         (values (result api) api)))))
 
 (defmacro with-captured-dex-error (&body body)
@@ -444,7 +449,7 @@ special condition defined in src/classes.lisp and signals."
                  (handler-case
                      (locally (bt:with-timeout (30)
                                 ,@body))
-                   (sb-ext:timeout (,condition)
+                   (bt:timeout (,condition)
                      (error 'api-timeout :api-timeout-message "Connection broken"
                                          :api-timeout-condition ,condition))
                    (usocket:socket-condition (,condition)

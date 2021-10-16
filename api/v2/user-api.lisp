@@ -187,24 +187,6 @@ object%event/m-room-message/m.image"
                            :room-id room-id)))
 
 (defun create-room (connection name room-alias topic
-                    &key (private t) (invite nil))
-  (check-type invite (or list null))
-  (auth-req (:post connection ("createRoom")
-             (list :|preset| (if private
-                                 "private_chat"
-                                 "public_chat")
-                   :|visibility| (if private
-                                     "private"
-                                     "public")
-                   :|invite| invite
-                   :|room_alias_name| room-alias
-                   :|name| name
-                   :|topic| topic
-                   :|creation_content| (list :|m.federate| t))
-             resp)
-    resp))
-
-(defun create-room (connection name room-alias topic
                     &rest keys &key &allow-other-keys)
   (call-api (apply #'make-instance 'create-room
                    (append (list :name name :room-alias room-alias
@@ -257,7 +239,6 @@ object%event/m-room-message/m.image"
 
 (defun user-online-p (connection user-id)
   (getf (get-user-presence connection user-id) :|currently_active|))
-
 
 (defun set-avatar-url (connection user-id mxc)
   (call-api (make-instance 'profile%set-avatar-url
