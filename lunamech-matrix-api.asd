@@ -8,6 +8,7 @@
                #:drakma
                #:jonathan
                #:str
+               #:plump 
                #:cl-json
                #:reader
                #:closer-mop
@@ -33,6 +34,7 @@
                               :serial t
                               :components ((:file "classes")
                                            (:file "conditions")
+                                           (:file "call-wrapper")
                                            (:file "api-protocol")))
                              (:file "conditions")
                              (:module "2"

@@ -433,41 +433,6 @@ removed if no value is added."
                   (jojo:parse (execute-api-call api fun url header-list))))
         (values (result api) api)))))
 
-(defmacro with-captured-dex-error (&body body)
-  "Catches any conditions signalled by dex and converts the response into a 
-special condition defined in src/classes.lisp and signals."
-  (alexandria:with-gensyms (condition)
-    `(labels ((try-again-restart (fun)
-                (restart-case
-                    (funcall fun)
-                  (try-again ()
-                    :report "Try again?"
-                    (sleep 3)
-                    (try-again-restart fun)))))
-       (let ((fun
-               (lambda ()
-                 (handler-case
-                     (locally (bt:with-timeout (30)
-                                ,@body))
-                   (bt:timeout (,condition)
-                     (error 'api-timeout :api-timeout-message "Connection broken"
-                                         :api-timeout-condition ,condition))
-                   (usocket:socket-condition (,condition)
-                     (error 'api-no-connection :api-timeout-message "No network"
-                                               :api-timeout-condition ,condition))
-                   (condition (,condition);;total catchall oh well
-                     (handler-case
-                         (progn 
-                           (signal-condition-from-response
-                            (jojo:parse (dexador.error:response-body ,condition))))
-                       (jojo:<jonathan-error> (,condition)
-                         (error 'api-no-connection
-                                ;;if the server is down then this will end up
-                                ;;returning html not json
-                                :api-timeout-message "Server probably down"
-                                :api-timeout-condition ,condition))))))))
-         (try-again-restart fun)))))
-
 (defmethod slots-still-missing ((api api))
   (let* ((slots (c2mop:class-direct-slots (class-of api)))
          (required (remove-if-not #'requiredp slots)))

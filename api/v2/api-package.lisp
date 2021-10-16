@@ -622,6 +622,10 @@
 
            #:api-no-connection
 
+           #:api-request-failed
+           #:api-request-failed-message
+           #:api-request-failed-condition
+
            #:m-forbidden
            #:m-unknown-token
            #:m-missing-token
@@ -715,4 +719,11 @@
            #:result
 
            #:url-e
+           ;;protocol/call-wrapper
+           #:with-captured-dex-error
+           #:try-again 
+
+           #:%call-condition-handler
+
+           #:%handler-dex-condition
            ))

@@ -114,6 +114,23 @@ MISSING: NONE {10042E8DDB}>
 LMAV2> 
 ```
 
+## Retrying
+Every API call is wrapped with the macro 'with-captured-dex-error' (see api/v2/protocol/call-wrapper.lisp) this macro wraps its body with a bt:with-timeout and catches the bt:timeout and signalling a api-timeout condition, it also catches all other conditions and passes them to a method called `%call-condition-handler`, a variety of conditions are handled elegantly and are converted into specific subclass of api-error, however if no method is found for the signalled condition then the top-level condition of 'api-error is signalled.
+The macro also provides a restart called 'try-again', this will execute the body of `with-captured-dex-error` again. This can be invoked like so: 
+
+```lisp
+LMAV2> (handler-bind ((condition (lambda (c) (declare (ignore c))
+                                   (print "restarting")
+                                   (invoke-restart 'try-again))))
+         (with-captured-dex-error (sleep 2)))
+
+"restarting" 
+"restarting" 
+```
+(by default the timeout is 30 seconds, it was reduced to 1 just for this demonstration)
+
+So for example if you are running a loop where it constantly checks for a new sync, you can wrap that call or worker thread with a handler-bind which invokes restart, perhaps you could try logging in again etc and then restarting the thread where it was without having unwound the stack. You can see the default way conditions signalled by api-calls are handled in the previously mentioned files.
+
 # v1
 ## See api/user-api 
 ## See api/admin-api

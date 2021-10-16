@@ -44,6 +44,19 @@
              (api-timeout-message con)
              (api-timeout-condition con)))))
 
+(define-condition api-request-failed (api-error)
+  ((api-request-failed-message
+    :accessor api-request-failed-message
+    :initarg :api-request-failed-message)
+   (api-request-failed-condition
+    :accessor api-request-failed-condition
+    :initarg :api-request-failed-condition))
+  (:report
+   (lambda (con stream)
+     (format stream "HTTP request failed.~%Message: ~A~%Original condition: ~A~%"
+             (api-timeout-message con)
+             (api-timeout-condition con)))))
+
 (define-condition api-no-connection (api-timeout)
   ())
 
