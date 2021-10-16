@@ -529,4 +529,190 @@
 
            #:spaces%space-hierarchy
            #:suggested-only
-           #:max-depth))
+           #:max-depth
+           ;;user-api 
+           #:password-login
+
+           #:logout
+
+           #:public-rooms
+
+           #:get-room-state
+
+           #:join-room
+
+           #:leave-room
+
+           #:joined-rooms
+
+           #:send-message-to-room
+
+           #:send-message-event-to-room
+
+           #:send-event-to-room
+
+           #:redact-event-in-room
+
+           #:kick-user-from-room
+
+           #:user-display-name
+
+           #:valid-user-p
+
+           #:ban-user-from-room
+
+           #:unban-user-from-room
+
+           #:members-in-room
+
+           #:members-in-room-ids
+
+           #:upload-content
+
+           #:send-image-file-to-room
+
+           #:send-image-bytes-to-room
+
+           ;;classes
+           #:status
+           #:latest-sync
+           
+           #:connection
+           #:logged-in-p
+           #:filters
+           #:status
+           #:url
+           #:api
+           #:username
+           #:txn
+           #:user-id
+           #:password
+           #:auth
+           #:encryption
+           #:con-lock
+           #:device-id
+
+           #:with-locked-connection
+
+           #:make-connection
+
+           #:encryption
+           #:olm-account
+           #:server-otk
+
+           #:auth
+           #:token
+
+           #:filter
+           #:key
+           #:id
+           #:last-sync-string
+           #:next-sync-string
+           ;;conditions
+           #:lunamech-matrix-api-condition
+           #:api-error
+           #:api-error-error
+           #:api-error-code
+           #:api-error-args
+           #:api-error-description
+
+           #:api-timeout
+           #:api-timeout-message
+           #:api-timeout-condition
+
+           #:api-no-connection
+
+           #:m-forbidden
+           #:m-unknown-token
+           #:m-missing-token
+           #:m-bad-json
+           #:m-not-json
+           #:m-not-found
+           #:m-limit-exceeded
+           #:m-unknown
+           #:m-unrecognized
+           #:m-unauthorized
+           #:m-invalid-param
+           #:m-room-in-use
+           #:m-bad-state
+           ;;sync 
+           #:sync
+           
+           #:traverse-sync
+           
+           #:room-timeline
+           
+           #:room-messages
+           
+           #:membership-events
+           
+           #:room-leaves
+
+           #:room-joins
+
+           #:room-invite
+
+           #:extract-events-of-type
+           ;;integration
+           #:dimension-connection
+
+           #:dimension-api
+
+           #:integration%register
+           #:access-token
+           #:matrix-server-name
+           #:token-type
+           #:expires-in
+           
+           #:integration%account
+
+           #:integration%register
+
+           #:integration%user-information
+
+           #:integration%validate-user-id
+           ;;object-helpers
+           #:%quick-hash
+
+           #:object%identifier-type/m-id-user
+
+           #:object%identifier-type/m-id-thirdparty
+
+           #:object%identifier-type/m-id-phonenumber
+
+           #:object%event/m-room-redaction
+
+           #:object%event/m-room-message/m-text%basic
+
+           #:object%event/m-room-message/m-text
+
+           #:object%image-info
+
+           #:object%file-info
+
+           #:object%thumbnail-info
+
+           #:object%event/m-room-message/m-image
+           ;;protocol/conditions
+           #:api-protocol-condition
+           #:message
+
+           #:problems-with-special
+
+           #:set-special
+
+           #:special-slot-is-not-bound
+
+           #:connection-unbound
+           #:obj
+
+           #:api-protocol-condition
+           #:slot
+           ;;protocol/api-protocol
+           #:call-api
+
+           #:api
+           #:result
+
+           #:url-e
+           ))

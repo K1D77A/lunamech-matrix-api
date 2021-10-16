@@ -176,7 +176,7 @@ object%event/m-room-message/m.image"
   (let ((url (getf (upload-content connection name content-type bytes)
                    :|content_uri|)))
     (send-message-event-to-room connection room-id
-                                (apply #'object%event/m-room-message/m.image
+                                (apply #'object%event/m-room-message/m-image
                                        (append (list :body name
                                                      :url url)
                                                keys)))))

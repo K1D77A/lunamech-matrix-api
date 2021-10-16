@@ -56,7 +56,7 @@
 (defun object%thumbnail-info (&key (h nil) (w nil) (mimetype nil) (size nil))
   (%quick-hash `(("h" . ,h)("w" . ,w)("mimetype" . ,mimetype)("size" . ,size))))
 
-(defun object%event/m-room-message/m.image (&key (body nil) (info nil) (url nil) (file nil))
+(defun object%event/m-room-message/m-image (&key (body nil) (info nil) (url nil) (file nil))
   (or (or url file) (error "url must be set if not encrypted, file if encrypted."))
   (values (%quick-hash `(("body" . ,body)
                          ("info" . ,info)
