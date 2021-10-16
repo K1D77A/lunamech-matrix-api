@@ -766,7 +766,13 @@
               :initarg :data-type
               :name->json "type"
               :requiredp t
-              :in-url-p t))
+              :in-url-p t)
+             (body
+              :accessor body
+              :initarg :body
+              :requiredp t
+              :specialp t))
+            (:specialp t)
             (:rate-limited-p nil)
             (:requires-auth-p t))
 

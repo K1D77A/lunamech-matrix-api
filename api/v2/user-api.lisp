@@ -50,13 +50,6 @@
                                  :room-id room-id)
                            rest))))
 
-;; (defun get-room-events (connection room-id event-type &rest rest &key &allow-other-keys)
-;;   ;;  (call-api
-;;   (apply #'make-instance 'events%get-from-type-with-statekey 
-;;          (append (list :connection connection
-;;                        :room-id room-id
-;;                        :event-type event-type)
-;;                  rest)))
 
 (defun join-room (connection room-id)
   "Makes CONNECTION joined the room denoted by ROOM-ID. Assuming it can."
@@ -182,14 +175,100 @@ object%event/m-room-message/m.image"
                                                keys)))))
 
 
+(defun messages-in-room (connection room-id &rest keys &key &allow-other-keys)
+  (call-api (apply #'make-instance 'events%get-room-messages 
+                   (append (list :connection connection :room-id room-id)
+                           keys))))
+
+(defun invite-member-to-room (connection user-id room-id)
+  (call-api (make-instance 'rooms%invite-user-to-room
+                           :connection connection
+                           :user-id user-id
+                           :room-id room-id)))
+
+(defun create-room (connection name room-alias topic
+                    &key (private t) (invite nil))
+  (check-type invite (or list null))
+  (auth-req (:post connection ("createRoom")
+             (list :|preset| (if private
+                                 "private_chat"
+                                 "public_chat")
+                   :|visibility| (if private
+                                     "private"
+                                     "public")
+                   :|invite| invite
+                   :|room_alias_name| room-alias
+                   :|name| name
+                   :|topic| topic
+                   :|creation_content| (list :|m.federate| t))
+             resp)
+    resp))
+
+(defun create-room (connection name room-alias topic
+                    &rest keys &key &allow-other-keys)
+  (call-api (apply #'make-instance 'create-room
+                   (append (list :name name :room-alias room-alias
+                                 :topic topic :connection connection
+                                 :preset "public_chat" :visibiilty "public")
+                           keys))))
+
+(defun create-private-room (connection name room-alias topic
+                            &rest keys &key &allow-other-keys)
+  (call-api (apply #'make-instance 'create-room
+                   (append (list :name name :room-alias room-alias
+                                 :topic topic :connection connection
+                                 :visibility "private" :preset "private_chat")
+                           keys))))
+
+(defun user-profile-url (connection user-id)
+  (call-api (make-instance 'profile%get-avatar-url
+                           :user-id user-id
+                           :connection connection)))
 
 
+(defun download-content (connection mxc-address &key (allow-remote "true"))
+  (let* ((mxc-list (str:split "/" mxc-address))
+         (content-id (first (last mxc-list)))
+         (homeserver (third mxc-list)))
+    (call-api (make-instance 'media%get-media
+                             :media-id content-id
+                             :connection connection
+                             :server-name homeserver
+                             :allow-remote allow-remote))))
+
+(defun add-to-account-data (connection user-id key data)
+  "Add DATA (a hashtable) to the type KEY for USER-ID."
+  (call-api (make-instance 'account-data%set-data
+                           :user-id user-id
+                           :connection connection
+                           :data-type key
+                           :body data)))
+
+(defun get-account-data (connection user-id event-type)
+  (call-api (make-instance 'account-data%get-data
+                           :user-id user-id
+                           :connection connection
+                           :data-type event-type)))
+
+(defun get-user-presence (connection user-id)
+  (call-api (make-instance 'presence%get-presence
+                           :connection connection
+                           :user-id user-id)))
+
+(defun user-online-p (connection user-id)
+  (getf (get-user-presence connection user-id) :|currently_active|))
 
 
+(defun set-avatar-url (connection user-id mxc)
+  (call-api (make-instance 'profile%set-avatar-url
+                           :avatar-url mxc
+                           :user-id user-id
+                           :connection connection)))
 
-
-
-
+(defun request-open-id-token (connection)
+  (call-api (make-instance 'openid%request-openid
+                           :connection connection
+                           :user-id (user-id connection))))
 
 
 
