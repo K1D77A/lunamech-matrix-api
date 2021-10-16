@@ -135,7 +135,7 @@ LMAV2>
 ```
 ## Filters and syncing
 
-Make the filter object, this is a normal api object made normally with `generate-user-room-filter` or `(make-instance 'filters%upload ..)` 
+Make the filter object, this is a normal api object made normally with `generate-user-room-filter` or `(make-instance 'filters%upload ..)` You can see an example in filters.lisp, the objects from the spec are in objects.lisp.
 ```lisp
 LMAV2> (filter-to-remove-receipts-reaction-typing #v13 "@om")
 #<FILTERS%UPLOAD 
