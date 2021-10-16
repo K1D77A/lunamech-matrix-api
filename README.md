@@ -133,6 +133,37 @@ JSON: {"reason":"Test"}
 MISSING: NONE {10042E8DDB}>
 LMAV2> 
 ```
+## Filters and syncing
+
+Make the filter object, this is a normal api object made normally with `generate-user-room-filter` or `(make-instance 'filters%upload ..)` 
+```lisp
+LMAV2> (filter-to-remove-receipts-reaction-typing #v13 "@om")
+#<FILTERS%UPLOAD 
+POST https://matrix..m/_matrix/client/r0/user/%om/filter
+Content-Type: application/json; charset=utf-8
+JSON: {"event_format":"client","presence":{"not_types":["m.presence"]},"room":{"ephemeral":{"not_types":["m.room.*","m.receipt","m.typing","m.reaction"]}}}
+MISSING: NONE {100790EECB}>
+```
+Then call `(upload-new-filter <key> <filter-object>)`
+```lisp
+LMAV2> (upload-new-filter :junk-removed *)
+(#<FILTER {100790A193}>)
+```
+You can now sync using that filter (ofcourse you can sync without a filter).
+
+```lisp
+(sync #v13 :filter "9")
+```
+Or using (key-sync <con> <key>)
+
+```lisp
+LMAV2> (key-sync #v13 :junk-removed)
+(:|org.matrix.msc2732.device_unused_fallback_key_types| NIL
+ :|device_one_time_keys_count| (:|signed_curve25519| 0) :|next_batch|
+ "s1694008_20710893_241342_3874091_2715649_2558_1533518_732813_698")
+ ```
+
+
 
 ## Retrying
 Every API call is wrapped with the macro 'with-captured-dex-error' (see api/v2/protocol/call-wrapper.lisp) this macro wraps its body with a bt:with-timeout and catches the bt:timeout and signalling a api-timeout condition, it also catches all other conditions and passes them to a method called `%call-condition-handler`, a variety of conditions are handled elegantly and are converted into specific subclass of api-error, however if no method is found for the signalled condition then the top-level condition of 'api-error is signalled.

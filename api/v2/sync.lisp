@@ -1,13 +1,13 @@
 
 (in-package #:lunamech-matrix-api/v2)
 
-(defun sync (connection &optional (filter-id nil))
+(defun sync (connection &rest keys &key &allow-other-keys)
   "Gets the latest sync object from the server using CONNECTION."
   (with-accessors ((status status))
       connection 
-    (let ((call (make-instance 'sync :connection connection)))
-      (when filter-id
-        (setf (filter-id call) filter-id))
+    (let ((call (apply #'make-instance 'sync
+                       (append (list :connection connection)
+                               keys))))
       (when (slot-boundp status 'latest-sync)
         (setf (since call)
               (getf (latest-sync status) :|next_batch|)))
@@ -18,15 +18,21 @@
         (setf (latest-sync status) resp)
         resp))))
 
-(defun traverse-sync (sync list-of-keys)
-  "The default sync that is received and then parsed from the server ends up as one big ol 
+(defun key-sync (connection filter-key &rest keys &key &allow-other-keys)
+  (let ((filter (find filter-key (filters connection) :key #'key :test #'eq)))
+    (or filter (error "No key found."))
+    (apply #'sync connection (append (list :filter (id filter))
+                                     keys))))
+
+  (defun traverse-sync (sync list-of-keys)
+    "The default sync that is received and then parsed from the server ends up as one big ol 
 plist, so this function takes a variety of lowercase keywords ie :|imasym| and steps through
 the plist using those keys."
-  (loop :for key keyword :in list-of-keys
-        :for sy := (getf sync key)
-          :then (getf sy key)
-        :always sy
-        :finally (return sy)))
+    (loop :for key keyword :in list-of-keys
+          :for sy := (getf sync key)
+            :then (getf sy key)
+          :always sy
+          :finally (return sy)))
 
 (defun room-timeline (sync room-id)
   (traverse-sync sync (list ':|rooms| ':|join| room-id ':|timeline| ':|events|)))
