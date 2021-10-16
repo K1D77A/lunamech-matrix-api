@@ -15,7 +15,7 @@ When using an api call like
 Make sure you check the API documentation to see which slot does what because boolean query parameters are "true" | "false" while the boolean values for json body parameters are t | nil. You might be able to workout which is from the initial value, if its "false" | "true" you know its a query param. Maybe I will implement a translator at some point for the query params.
 
 in `object-helpers.lisp` there are a variety of objects constructed using keyword arguments,
-all arguments that default to :ne mean "no encode".
+all arguments that default to :ne mean "no encode", these list items are completely ignored.
 
 ```lisp
 (defun object%room-filter (&key (not-rooms :ne)(rooms :ne)(ephemeral :ne)
