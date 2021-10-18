@@ -3,8 +3,8 @@ Basic implementation of the Matrix API used in [LunaMech](https://github.com/K1D
 [Lunamech.com](https://lunamech.com)
 
 # v2
-V2 is under active development while v1 is now in maintenance only mode.
-Currently v2 wraps every call in the client-server spec, the spaces api and every call in the synapse admin api.
+V2 is under active development while v1 is now in maintenance only mode. I suggest all new users use V2.
+Currently v2 wraps every call in the client-server spec, the spaces api, every call in the synapse admin api and the integrations API (handling OpenID verification).
 
 # Important notes
 

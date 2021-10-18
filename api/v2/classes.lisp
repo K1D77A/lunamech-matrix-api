@@ -34,8 +34,8 @@
     :type string)
    (username
     :accessor username
-    :type string
-    :initarg :username)
+    :initarg :username
+    :type string)
    (txn
     :accessor txn
     :initarg :txn
@@ -65,10 +65,11 @@
     :documentation "A lock for the connection")
    (device-id
     :accessor device-id
+    :initarg :device-id
     :type string)))
 
 (defmacro with-locked-connection ((connection) &body body)
-  `(bt:with-lock-held ((con-lock ,connection))
+  `(bt:with-recursive-lock-held ((con-lock ,connection))
      (locally ,@body)))
 
 ;; (slot-locks
