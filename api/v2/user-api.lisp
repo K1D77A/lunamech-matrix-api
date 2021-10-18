@@ -50,7 +50,6 @@
                                  :room-id room-id)
                            rest))))
 
-
 (defun join-room (connection room-id)
   "Makes CONNECTION joined the room denoted by ROOM-ID. Assuming it can."
   (call-api (make-instance 'rooms%join-a-room :room-id room-id :connection connection)))

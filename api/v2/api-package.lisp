@@ -573,6 +573,30 @@
 
            #:send-image-bytes-to-room
 
+           #:messages-in-room
+
+           #:invite-member-to-room
+
+           #:create-room
+
+           #:create-private-room
+
+           #:user-profile-url
+
+           #:download-content
+
+           #:add-to-account-data
+
+           #:get-user-presence
+
+           #:user-online-p
+
+           #:set-avatar-url
+
+           #:request-open-id-token
+
+           
+
            ;;classes
            #:status
            #:latest-sync
