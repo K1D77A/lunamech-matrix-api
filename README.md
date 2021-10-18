@@ -182,6 +182,55 @@ LMAV2> (handler-bind ((condition (lambda (c) (declare (ignore c))
 
 So for example if you are running a loop where it constantly checks for a new sync, you can wrap that call or worker thread with a handler-bind which invokes restart, perhaps you could try logging in again etc and then restarting the thread where it was without having unwound the stack. You can see the default way conditions signalled by api-calls are handled in the previously mentioned files.
 
+## Serializing
+
+You can serialize a connection object so it can be saved to a file like so:
+```lisp
+
+LMAV2> #v1
+#<CONNECTION 
+URL: "https://matrix..com/_matrix/client/r0/"
+Username: ""
+Logged in: T
+Auth: #<AUTH {10041E6AD3}>
+Device-id: "KZCNNOWDTG"
+ {1007955553}>
+LMAV2> (serialize-connection *)
+
+(:URL "https://matrix..com" :USERNAME "lh" :LOGGED-IN-P T :AUTH
+ (:TOKEN "sy7UW") :DEVICE-ID "KZCNNOWDTG"
+ :TXN 0 :API "/_matrix/client/r0/" :FILTERS
+ ((:KEY :JUNK-REMOVED :ID "9" :LAST-SYNC-STRING NIL :NEXT-SYNC-STRING :NO-VAL))
+ :STATUS
+ (:NEXT-BATCH
+  "s1702228_20900254_263756_3891211_2744250_2560_1540087_736560_698"
+  :LATEST-SYNC :NO-VAL)
+ :USER-ID "@lunamech:scyldings.com")#<CONNECTION 
+URL: "https://matrix./_matrix/client/r0/"
+Username: ""
+Logged in: T
+Auth: #<AUTH {100B9CE233}>
+Device-id: "TDCJWNGOHN"
+ {100B973E73}>
+ 
+```
+The following slots are serialized by default
+`url username logged-in-p auth device-id txn api filters status user-id`
+
+Then restore like so:
+
+```lisp
+LMAV2> (restore-connection *)
+#<CONNECTION 
+URL: "https://m.com/_matrix/client/r0/"
+Username: ""
+Logged in: T
+Auth: #<AUTH {10031E19C3}>
+Device-id: "KZCNNOWDTG"
+ {100318FDC3}>
+```
+The actual syncs are not restored, only the next-batch is, meaning if you call `sync` on your restored connection it will sync from your last previous sync, if you want to avoid this and do a completely new sync then you can call `dry-sync` which will remove the next-batch from your status and call sync normally..
+
 # v1
 ## See api/user-api 
 ## See api/admin-api

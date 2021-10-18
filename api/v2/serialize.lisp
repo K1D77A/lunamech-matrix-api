@@ -2,7 +2,7 @@
 
 (defun serialize-connection (connection
                              &optional (slots '(url username logged-in-p auth
-                                                device-id status txn
+                                                device-id txn
                                                 api filters status user-id)))
   (flet ((when-boundp (slot)
            (let ((key (intern (string-upcase slot) :keyword)))
@@ -40,7 +40,7 @@
         (if (slot-boundp obj 'next-batch)
             (slot-value obj 'next-batch)
             :no-val)
-        :latest-sync))
+        :latest-sync :no-val))
 
 (defmethod restore-from-key ((key (eql :status)) list)
   (apply 'make-instance 'status list))

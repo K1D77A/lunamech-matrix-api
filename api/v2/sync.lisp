@@ -18,21 +18,26 @@
               (next-batch status) (getf resp :|next_batch|))
         resp))))
 
+(defun dry-sync (connection &rest keys &key &allow-other-keys)
+  (when (slot-boundp (status connection) 'next-batch)
+    (slot-makunbound (status connection) 'next-batch))
+  (apply #'sync connection keys))
+
 (defun key-sync (connection filter-key &rest keys &key &allow-other-keys)
   (let ((filter (find filter-key (filters connection) :key #'key :test #'eq)))
     (or filter (error "No key found."))
     (apply #'sync connection (append (list :filter (id filter))
                                      keys))))
 
-  (defun traverse-sync (sync list-of-keys)
-    "The default sync that is received and then parsed from the server ends up as one big ol 
+(defun traverse-sync (sync list-of-keys)
+  "The default sync that is received and then parsed from the server ends up as one big ol 
 plist, so this function takes a variety of lowercase keywords ie :|imasym| and steps through
 the plist using those keys."
-    (loop :for key keyword :in list-of-keys
-          :for sy := (getf sync key)
-            :then (getf sy key)
-          :always sy
-          :finally (return sy)))
+  (loop :for key keyword :in list-of-keys
+        :for sy := (getf sync key)
+          :then (getf sy key)
+        :always sy
+        :finally (return sy)))
 
 (defun room-timeline (sync room-id)
   (traverse-sync sync (list ':|rooms| ':|join| room-id ':|timeline| ':|events|)))

@@ -641,6 +641,8 @@
            #:m-bad-state
            ;;sync 
            #:sync
+
+           #:dry-sync
            
            #:traverse-sync
            
