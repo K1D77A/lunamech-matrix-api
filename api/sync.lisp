@@ -20,13 +20,17 @@
 
 ;;;problem solved in syncing.lisp using filter objects that maintain their own
 ;;;last sync 
-(defun sync (connection &optional filter-id)
+(defun sync (connection &key filter-id timeout)
   "Gets the latest sync object from the server using CONNECTION."
   (let ((plist (when filter-id (list :|filter| filter-id))))
     (when (slot-boundp (status connection) 'latest-sync)
-      (setf plist (append plist (list :|since|
-                                      (getf (latest-sync (status connection))
-                                            :|next_batch|)))))
+      (setf plist (append plist
+                          (list :|since|
+                                (getf (latest-sync (status connection))
+                                      :|next_batch|))
+                          (if timeout
+                              (list :|timeout| timeout)
+                              nil))))
     (auth-req (:get connection ("sync") plist resp)
       (setf (latest-sync (status connection)) resp)
       (when (slot-boundp connection 'encryption)
