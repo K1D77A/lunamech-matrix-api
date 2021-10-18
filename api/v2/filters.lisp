@@ -1,4 +1,4 @@
-(in-package #:matrix-moonbot)
+(in-package #:lunamech-matrix-api/v2)
 ;;;;this file contains the code for creating and managing filters within Moonbot.
 
 (defun get-filter (instance key)

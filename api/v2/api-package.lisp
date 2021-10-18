@@ -726,4 +726,15 @@
            #:%call-condition-handler
 
            #:%handler-dex-condition
+
+           ;;filters
+           #:get-filter
+
+           #:add-filter-id
+
+           #:filter-to-remove-receipts-reaction-typing
+
+           #:upload-new-filter
+
+           #:generate-user-room-filter
            ))
