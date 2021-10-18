@@ -8,14 +8,14 @@
     (let ((call (apply #'make-instance 'sync
                        (append (list :connection connection)
                                keys))))
-      (when (slot-boundp status 'latest-sync)
-        (setf (since call)
-              (getf (latest-sync status) :|next_batch|)))
+      (when (slot-boundp status 'next-batch)
+        (setf (since call) (next-batch status)))
       (let ((resp (call-api call)))
         (when (slot-boundp connection 'encryption)
           (setf (server-otk (encryption connection))
                 (getf (getf resp :|device_one_time_keys_count|) :|signed_curve25519|)))
-        (setf (latest-sync status) resp)
+        (setf (latest-sync status) resp
+              (next-batch status) (getf resp :|next_batch|))
         resp))))
 
 (defun key-sync (connection filter-key &rest keys &key &allow-other-keys)

@@ -29,6 +29,7 @@
                 :serial t
                 :components ((:file "api-package")
                              (:file "classes")
+                             (:file "serialize")
                              (:module "protocol"
                               :description "The MOP protocol"
                               :serial t

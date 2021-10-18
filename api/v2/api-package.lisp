@@ -737,4 +737,9 @@
            #:upload-new-filter
 
            #:generate-user-room-filter
+
+           ;;serialize
+           #:serialize-connection
+
+           #:restore-connection
            ))

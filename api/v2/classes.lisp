@@ -2,7 +2,13 @@
 
 (defclass status ()
   ((latest-sync
-    :accessor latest-sync)))
+    :accessor latest-sync
+    :initarg :latest-sync
+    :type (or null string))
+   (next-batch
+    :accessor next-batch 
+    :initarg :next-batch 
+    :type (or null string))))
 
 (defun %ql (name)
   (cons name (bt:make-lock)))
@@ -130,6 +136,7 @@
     :type (or null string))
    (next-sync-string
     :accessor next-sync-string
+    :initarg :next-sync-string
     :type (or null string)))
   (:documentation "Used to store data about a filter and its key"))
 
