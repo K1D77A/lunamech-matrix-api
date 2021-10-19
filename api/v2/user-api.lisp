@@ -71,12 +71,12 @@
   (send-event-to-room connection room-id "m.room.message" message-event))
 
 (defun send-event-to-room (connection room-id event-type event)
-  ;;  (call-api
-  (make-instance 'events%put-message-event-into-room
-                 :body event 
-                 :room-id room-id
-                 :event-type event-type
-                 :connection connection))
+  (call-api
+   (make-instance 'events%put-message-event-into-room
+                  :body event 
+                  :room-id room-id
+                  :event-type event-type
+                  :connection connection)))
 
 (defun redact-event-in-room (connection room-id event-id reason)
   (call-api (make-instance 'events%redact-event
@@ -143,12 +143,12 @@
                            :connection connection)))
 
 (defun upload-content (connection filename content-type content-bytes)
-                                        ;  (call-api
-  (make-instance 'media%upload
-                 :connection connection
-                 :filename filename
-                 :content-type content-type
-                 :bytes content-bytes))
+  (call-api
+   (make-instance 'media%upload
+                  :connection connection
+                  :filename filename
+                  :content-type content-type
+                  :bytes content-bytes)))
 
 (defun send-image-file-to-room (connection room-id name content-type path
                                 &rest keys &key &allow-other-keys)
