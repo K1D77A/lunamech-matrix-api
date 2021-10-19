@@ -71,11 +71,12 @@
   (send-event-to-room connection room-id "m.room.message" message-event))
 
 (defun send-event-to-room (connection room-id event-type event)
-  (call-api (make-instance 'events%put-message-event-into-room
-                           :body event 
-                           :room-id room-id
-                           :event-type event-type
-                           :connection connection)))
+  ;;  (call-api
+  (make-instance 'events%put-message-event-into-room
+                 :body event 
+                 :room-id room-id
+                 :event-type event-type
+                 :connection connection))
 
 (defun redact-event-in-room (connection room-id event-id reason)
   (call-api (make-instance 'events%redact-event
@@ -142,21 +143,22 @@
                            :connection connection)))
 
 (defun upload-content (connection filename content-type content-bytes)
-  (call-api (make-instance 'media%upload
-                           :connection connection
-                           :filename filename
-                           :content-type content-type
-                           :bytes content-bytes)))
+                                        ;  (call-api
+  (make-instance 'media%upload
+                 :connection connection
+                 :filename filename
+                 :content-type content-type
+                 :bytes content-bytes))
 
 (defun send-image-file-to-room (connection room-id name content-type path
                                 &rest keys &key &allow-other-keys)
   "Uploads image from PATH to to ROOM-ID. Keys are passed to 
-object%event/m-room-message/m.image"
+object%event/m-room-message/m-image"
   (let* ((file (alexandria:read-file-into-byte-vector path))
          (url (getf (upload-content connection name content-type file)
                     :|content_uri|)))
     (send-message-event-to-room connection room-id
-                                (apply #'object%event/m-room-message/m.image
+                                (apply #'object%event/m-room-message/m-image
                                        (append (list :body name
                                                      :url url)
                                                keys)))))
@@ -164,7 +166,7 @@ object%event/m-room-message/m.image"
 (defun send-image-bytes-to-room (connection room-id name content-type bytes
                                  &rest keys &key &allow-other-keys)
   "Uploads BYTES from BYTES to to ROOM-ID. Keys are passed to 
-object%event/m-room-message/m.image"
+object%event/m-room-message/m-image"
   (let ((url (getf (upload-content connection name content-type bytes)
                    :|content_uri|)))
     (send-message-event-to-room connection room-id
@@ -193,12 +195,16 @@ object%event/m-room-message/m.image"
                                  :preset "public_chat" :visibiilty "public")
                            keys))))
 
-(defun create-private-room (connection name room-alias topic
+(defun create-private-room (connection invite 
                             &rest keys &key &allow-other-keys)
   (call-api (apply #'make-instance 'create-room
-                   (append (list :name name :room-alias room-alias
-                                 :topic topic :connection connection
-                                 :visibility "private" :preset "private_chat")
+                   (append (list 
+                            :connection connection
+                            :invite invite
+                            :is-direct t 
+                            :creation-content
+                            (%quick-hash `(("m.federate" . t)))
+                            :visibility "private" :preset "private_chat")
                            keys))))
 
 (defun user-profile-url (connection user-id)
@@ -208,14 +214,15 @@ object%event/m-room-message/m.image"
 
 
 (defun download-content (connection mxc-address &key (allow-remote "true"))
-  (let* ((mxc-list (str:split "/" mxc-address))
-         (content-id (first (last mxc-list)))
-         (homeserver (third mxc-list)))
-    (call-api (make-instance 'media%get-media
-                             :media-id content-id
-                             :connection connection
-                             :server-name homeserver
-                             :allow-remote allow-remote))))
+  (let* ((mxc-list (str:split ":" mxc-address))
+         (content-id (second mxc-list))
+         (homeserver (second mxc-list)))
+    (call-api
+     (make-instance 'media%get-media
+                    :media-id content-id
+                    :connection connection
+                    :server-name homeserver
+                    :allow-remote allow-remote))))
 
 (defun add-to-account-data (connection user-id key data)
   "Add DATA (a hashtable) to the type KEY for USER-ID."

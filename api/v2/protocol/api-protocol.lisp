@@ -351,7 +351,9 @@ removed if no value is added."
     (unless (slot-boundp api special-slot)
       (error 'special-slot-is-not-bound 
              :message "You have declared a slot special but it is not bound..."))
-    (jojo:to-json (slot-value api special-slot))))
+    (if (eql special-slot 'bytes)
+        (slot-value api special-slot)
+        (jojo:to-json (slot-value api special-slot)))))
 
 (defmethod generate-body%normal ((api api))
   (to-json api))
@@ -450,7 +452,10 @@ removed if no value is added."
             (request-fun obj)
             (generate-url obj)
             (generate-content-type obj)
-            (generate-body obj)
+            (let ((body (generate-body obj)))
+              (if (> (length body) 300)
+                  (subseq body 0 300)
+                  body))
             (let ((missing (slots-still-missing obj)))
               (if missing
                   (mapcar #'c2mop:slot-definition-name missing)
