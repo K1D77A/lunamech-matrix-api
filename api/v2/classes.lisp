@@ -4,7 +4,7 @@
   ((latest-sync
     :accessor latest-sync
     :initarg :latest-sync
-    :type (or null string))
+    :type (or null list))
    (next-batch
     :accessor next-batch 
     :initarg :next-batch 
