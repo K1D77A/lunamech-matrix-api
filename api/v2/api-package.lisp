@@ -764,6 +764,12 @@
 
            #:generate-user-room-filter
 
+           #:object%state-filter
+           #:object%event-filter
+           #:object%state-filter
+           #:object%room-event-filter
+           #:object%room-filter
+
            ;;serialize
            #:serialize-connection
 

@@ -210,15 +210,15 @@
              (:rate-limited-p nil))
 
 (defapi%post admin%purge-remote-media-cache ("purge_media_cache")
-             "Delete media before TS."
-             ((unix-timestamp-in-ms
-               :accessor unix-timestamp-in-ms
-               :initarg :unix-timestamp-in-ms
-               :query-param-p t
-               :requiredp t))
-             (:api "/_synapse/admin/v1/")
-             (:requires-auth-p t)
-             (:rate-limited-p nil))
+  "Delete media before TS."
+  ((before-ts
+    :accessor before-ts
+    :initarg :before-ts
+    :query-param-p t
+    :requiredp t))
+  (:api "/_synapse/admin/v1/")
+  (:requires-auth-p t)
+  (:rate-limited-p nil))
 
 (defapi%post admin%purge-room-history ("purge_history/:room-id")
              "The purge history API allows server admins to purge historic events from their database, reclaiming disk space.

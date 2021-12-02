@@ -11,6 +11,7 @@
            #:*url*
            #:*luna*
            #:setup-and-go
+           #:status
            #:moonmat-message
            #:lunamat-message
            #:luna-message
@@ -20,6 +21,7 @@
            #:execute-module-communications
            #:register-module
            #:module-information
+           #:rooms-in-a-space 
            #:new-module
            #:defmodule
            #:pass-to-module
@@ -154,6 +156,11 @@
            #:filter
            #:force-stop
            #:found-modules
+           #:spaces-hierarchy
+           #:spaces-in-a-space
+           #:invite-to-space
+           #:invite-user-to-all-spaces-in-space
+           #:spaces-rooms
            #:from
            #:from-end
            #:gen-headers
@@ -191,6 +198,14 @@
            #:kick-user-from-room
            #:kicking-from
            #:latest-sync
+           #:traverse-sync
+           #:room-timeline
+           #:room-messages
+           #:membership-events
+           #:room-leaves
+           #:room-joins
+           #:room-invite
+           #:extract-events-of-types
            #:limit
            #:list-community->community-object
            #:list-of-devices
