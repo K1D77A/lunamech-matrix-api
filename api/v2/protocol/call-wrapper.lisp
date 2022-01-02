@@ -4,24 +4,24 @@
   "Catches any conditions signalled by dex and converts the response into a 
 special condition defined in src/classes.lisp and signals."
   (alexandria:with-gensyms (condition)
-    `(labels ((try-again-restart (fun)
-                (restart-case
-                    (funcall fun)
-                  (try-again ()
-                    :report "Try again?"
-                    (sleep 3)
-                    (try-again-restart fun)))))
-       (let ((fun (lambda ()
-                    (handler-case
-                        (locally (bt:with-timeout (30)
-                                   ,@body))
-                      (bt:timeout (,condition)
-                        ;;this is here because bt:timeout is a type but not a class..
-                        (error 'api-timeout :api-timeout-message "Connection broken"
-                                            :api-timeout-condition ,condition))
-                      (condition (,condition)
-                        (%call-condition-handler ,condition))))))
-         (try-again-restart fun)))))
+                           `(labels ((try-again-restart (fun)
+                                                        (restart-case
+                                                         (funcall fun)
+                                                         (try-again ()
+                                                                    :report "Try again?"
+                                                                    (sleep 3)
+                                                                    (try-again-restart fun)))))
+                                    (let ((fun (lambda ()
+                                                 (handler-case
+                                                     (locally (bt:with-timeout (120)
+                                                                               ,@body))
+                                                   (bt:timeout (,condition)
+                                                               ;;this is here because bt:timeout is a type but not a class..
+                                                               (error 'api-timeout :api-timeout-message "Connection broken"
+                                                                      :api-timeout-condition ,condition))
+                                                   (condition (,condition)
+                                                              (%call-condition-handler ,condition))))))
+                                      (try-again-restart fun)))))
 
 
 (defgeneric %call-condition-handler (condition)

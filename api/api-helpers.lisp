@@ -76,7 +76,7 @@ special condition defined in src/classes.lisp and signals."
                  (handler-case
                      (locally (bt:with-timeout (30)
                                 ,@body))
-                   (sb-ext:timeout (,condition)
+                   (bt:timeout (,condition)
                      (error 'api-timeout :api-timeout-message "Connection broken"
                                          :api-timeout-condition ,condition))
                    ((or usocket:socket-condition
@@ -103,22 +103,22 @@ special condition defined in src/classes.lisp and signals."
 (defun post-no-auth (connection url &optional (plist nil))
   (declare (ignorable connection))
   (with-captured-dex-error 
-    (let ((headers `(("Content-Type" . ,+content-type+))))
-      (if plist
-          (dex:post (apply #'str:concat url)
-                    :headers headers
-                    :content (jojo:to-json plist :from :plist)
-                    :use-connection-pool nil)
-          (dex:post (apply #'str:concat url)
-                    :headers headers
-                    :use-connection-pool nil)))))
+      (let ((headers `(("Content-Type" . ,+content-type+))))
+        (if plist
+            (dex:post (apply #'str:concat url)
+                      :headers headers
+                      :content (jojo:to-json plist :from :plist)
+                      :use-connection-pool nil)
+            (dex:post (apply #'str:concat url)
+                      :headers headers
+                      :use-connection-pool nil)))))
 
 (defun post-content (connection url content-type content)
   (with-captured-dex-error
-    (dex:post (apply #'str:concat url)
-              :headers (gen-headers connection content-type)
-              :content content
-              :use-connection-pool nil)))
+      (dex:post (apply #'str:concat url)
+                :headers (gen-headers connection content-type)
+                :content content
+                :use-connection-pool nil)))
 
 (defclass empty-object ()
   ())
@@ -129,94 +129,94 @@ special condition defined in src/classes.lisp and signals."
 
 (defun post-request (connection url &optional (plist nil))
   (with-captured-dex-error
-    (let ((headers (gen-headers connection)))
-      (if plist
-          (dex:post (apply #'str:concat url)
-                    :headers headers
-                    :content (jojo:to-json plist :from :plist)
-                    :use-connection-pool nil)
-          (dex:post (apply #'str:concat url)
-                    :headers headers
-                    :use-connection-pool nil)))))
+      (let ((headers (gen-headers connection)))
+        (if plist
+            (dex:post (apply #'str:concat url)
+                      :headers headers
+                      :content (jojo:to-json plist :from :plist)
+                      :use-connection-pool nil)
+            (dex:post (apply #'str:concat url)
+                      :headers headers
+                      :use-connection-pool nil)))))
 
 (defun post-request-object (connection url object)
   (with-captured-dex-error
-    (let ((headers (gen-headers connection)))
-      (dex:post (apply #'str:concat url)
-                :headers headers
-                :content object
-                :use-connection-pool nil))));;do not auto convert to json
+      (let ((headers (gen-headers connection)))
+        (dex:post (apply #'str:concat url)
+                  :headers headers
+                  :content object
+                  :use-connection-pool nil))));;do not auto convert to json
 
 (defun admin-post-request (connection url &optional (plist nil))
   (with-captured-dex-error
-    (let ((headers (gen-headers connection)))
-      (if plist
-          (dex:post (apply #'str:concat url)
-                    :headers headers
-                    :content (jojo:to-json plist :from :plist)
-                    :use-connection-pool nil)
-          (dex:post (apply #'str:concat url) :headers headers
-                                             :use-connection-pool nil)))))
+      (let ((headers (gen-headers connection)))
+        (if plist
+            (dex:post (apply #'str:concat url)
+                      :headers headers
+                      :content (jojo:to-json plist :from :plist)
+                      :use-connection-pool nil)
+            (dex:post (apply #'str:concat url) :headers headers
+                                               :use-connection-pool nil)))))
 
 (defun admin-post-object (connection url object)
   (with-captured-dex-error
-    (let ((headers (gen-headers connection)))
-      (dex:post (apply #'str:concat url)
-                :headers headers
-                :content (jojo:to-json object)
-                :use-connection-pool nil))))
-  
+      (let ((headers (gen-headers connection)))
+        (dex:post (apply #'str:concat url)
+                  :headers headers
+                  :content (jojo:to-json object)
+                  :use-connection-pool nil))))
+
 
 ;;;put requests 
 (defun put-request (connection url plist)
   (with-captured-dex-error 
-    (dex:put (apply #'str:concat url) :headers (gen-headers connection)
-                                      :content  (jojo:to-json plist :from :plist)
-                                      :use-connection-pool nil)))
+      (dex:put (apply #'str:concat url) :headers (gen-headers connection)
+                                        :content  (jojo:to-json plist :from :plist)
+                                        :use-connection-pool nil)))
 
 (defun put-request-object (connection url object)
   (with-captured-dex-error 
-    (dex:put (apply #'str:concat url) :headers (gen-headers connection)
-                                      :content  (jojo:to-json object)
-                                      :use-connection-pool nil)))
+      (dex:put (apply #'str:concat url) :headers (gen-headers connection)
+                                        :content  (jojo:to-json object)
+                                        :use-connection-pool nil)))
 
 (defun put-request-from-json (connection url json-string)
   (with-captured-dex-error 
-    (dex:put (apply #'str:concat url) :headers (gen-headers connection)
-                                      :content  json-string
-                                      :use-connection-pool nil)))
+      (dex:put (apply #'str:concat url) :headers (gen-headers connection)
+                                        :content  json-string
+                                        :use-connection-pool nil)))
 
 (defun admin-put-request (connection url plist)
   (with-captured-dex-error 
-    (dex:put (apply #'str:concat url)
-             :headers (gen-headers connection)
-             :content  (jojo:to-json plist :from :plist)
-             :use-connection-pool nil)))
+      (dex:put (apply #'str:concat url)
+               :headers (gen-headers connection)
+               :content  (jojo:to-json plist :from :plist)
+               :use-connection-pool nil)))
 
 ;;;get requests      
 (defun get-request (connection url &optional (get-params nil))
   (with-captured-dex-error
-    (dex:get
-     (if get-params
-         (apply #'str:concat
-                (append url (list "?") (list (plist-to-get-params get-params))))
-         (apply #'str:concat url))
-     :headers (gen-headers connection)
-     :use-connection-pool nil)))
+      (dex:get
+       (if get-params
+           (apply #'str:concat
+                  (append url (list "?") (list (plist-to-get-params get-params))))
+           (apply #'str:concat url))
+       :headers (gen-headers connection)
+       :use-connection-pool nil)))
 
 (defun admin-get-request (connection url)
   (let ((url (apply #'str:concat url)))
     (with-captured-dex-error 
-      (dex:get url :headers (gen-headers connection)
-                   :use-connection-pool nil))))
+        (dex:get url :headers (gen-headers connection)
+                     :use-connection-pool nil))))
 
 
 ;;;delete requests
 (defun admin-delete-request (connection url)
   (let ((url (apply #'str:concat url)))
     (with-captured-dex-error 
-      (dex:delete url :headers (gen-headers connection)
-                      :use-connection-pool nil))))
+        (dex:delete url :headers (gen-headers connection)
+                        :use-connection-pool nil))))
 
 
 ;;;request macro system
@@ -230,91 +230,91 @@ special condition defined in src/classes.lisp and signals."
                        ,@body)))
 
 (new-r-t (:post-no-auth)
-  (jojo:parse
-   (post-no-auth connection
-                 (nconc (gen-url connection prefix) url)
-                 data)))
-
-(new-r-t (:post)
-  (jojo:parse
-   (post-request connection
-                 (nconc (gen-url connection  prefix) url)
-                 data)))
-
-(new-r-t (:post-object)
-  (jojo:parse
-   (post-request-object connection
+         (jojo:parse
+          (post-no-auth connection
                         (nconc (gen-url connection prefix) url)
                         data)))
 
+(new-r-t (:post)
+         (jojo:parse
+          (post-request connection
+                        (nconc (gen-url connection  prefix) url)
+                        data)))
+
+(new-r-t (:post-object)
+         (jojo:parse
+          (post-request-object connection
+                               (nconc (gen-url connection prefix) url)
+                               data)))
+
 (new-r-t (:post-content)
-  (jojo:parse
-   (post-content connection
-                 (nconc (gen-url connection  prefix) url)
-                 (getf data :content-type)
-                 (getf data :content))))
+         (jojo:parse
+          (post-content connection
+                        (nconc (gen-url connection  prefix) url)
+                        (getf data :content-type)
+                        (getf data :content))))
 
 (new-r-t (:get)
-  (jojo:parse
-   (get-request connection
-                (nconc (gen-url connection  prefix) url)
-                data)))
-
-(new-r-t (:content-get)
-  (get-request connection
-               (nconc (gen-url connection  prefix) url)
-               data))
-
-(new-r-t (:put)
-  (jojo:parse
-   (put-request connection
-                (nconc (gen-url connection  prefix) url)
-                data)))
-
-(new-r-t (:put-event)
-  (jojo:parse
-   (put-request-object connection
-                       (nconc (gen-url connection  prefix) url)
-                       (getf data :object))))
-
-(new-r-t (:put-content)
-  (jojo:parse
-   (put-request-object connection
+         (jojo:parse
+          (get-request connection
                        (nconc (gen-url connection  prefix) url)
                        data)))
 
+(new-r-t (:content-get)
+         (get-request connection
+                      (nconc (gen-url connection  prefix) url)
+                      data))
+
+(new-r-t (:put)
+         (jojo:parse
+          (put-request connection
+                       (nconc (gen-url connection  prefix) url)
+                       data)))
+
+(new-r-t (:put-event)
+         (jojo:parse
+          (put-request-object connection
+                              (nconc (gen-url connection  prefix) url)
+                              (getf data :object))))
+
+(new-r-t (:put-content)
+         (jojo:parse
+          (put-request-object connection
+                              (nconc (gen-url connection  prefix) url)
+                              data)))
+
 (new-r-t (:put-no-json)
-  (jojo:parse
-   (put-request-from-json connection
-                          (nconc (gen-url connection  prefix) url)
-                          data)))
+         (jojo:parse
+          (put-request-from-json connection
+                                 (nconc (gen-url connection  prefix) url)
+                                 data)))
 
 (new-r-t (:admin-post)
-  (declare (ignore prefix))
-  (jojo:parse
-   (admin-post-request connection (nconc (gen-admin-url connection) url) data)))
+         (declare (ignore prefix))
+         (jojo:parse
+          (admin-post-request connection (nconc (gen-admin-url connection) url) data)))
 
 (new-r-t (:admin-post-object)
-  (declare (ignore prefix))
-  (jojo:parse
-   (admin-post-request connection (nconc (gen-admin-url connection) url) data)))
+         (declare (ignore prefix))
+         (jojo:parse
+          (admin-post-request connection (nconc (gen-admin-url connection) url) data)))
 
 (new-r-t (:admin-get)
-  (declare (ignore prefix))
-  (jojo:parse
-   (admin-get-request connection (nconc (gen-admin-url connection) url))))
+         (declare (ignore prefix))
+         (jojo:parse
+          (admin-get-request connection (nconc (gen-admin-url connection) url))))
 
 (new-r-t (:admin-put)
-  (jojo:parse
-   (admin-put-request connection
-                      (nconc (gen-url connection  prefix) url)
-                      data)))
+         (jojo:parse
+          (admin-put-request connection
+                             (nconc (gen-url connection  prefix) url)
+                             data)))
 
 (new-r-t (:admin-delete)
-  (declare (ignore prefix))
-  (jojo:parse
-   (admin-delete-request connection
-                         (nconc (gen-admin-url connection) url))))
+         (declare (ignore prefix))
+         (jojo:parse
+          (admin-delete-request connection
+                                (nconc (gen-admin-url connection) url))))
 
 ;;;main macro for sending requests
 (defmacro auth-req ((method connection url data response-var

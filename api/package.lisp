@@ -88,6 +88,7 @@
            #:aliases
            #:add-new-alias
            #:already-processed
+           #:try-again
            #:api
            #:api-error-args
            #:api-error-code
@@ -205,7 +206,7 @@
            #:room-leaves
            #:room-joins
            #:room-invite
-           #:extract-events-of-types
+           #:extract-events-of-type
            #:limit
            #:list-community->community-object
            #:list-of-devices
