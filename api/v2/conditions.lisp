@@ -126,9 +126,6 @@ An additional response parameter, soft_logout, might be present on the response 
       (error (format nil "Condition for ~S not defined" string)))
     condition))
 
-(defmacro pkv (plist key)
-  `(getf ,plist ,key))
-
 (add-string->condition "M_FORBIDDEN" 'm-forbidden)
 (add-string->condition "M_UNKNOWN_TOKEN" 'm-unknown-token)
 (add-string->condition "M_MISSING_TOKEN" 'm-missing-token)
@@ -144,11 +141,10 @@ An additional response parameter, soft_logout, might be present on the response 
 (add-string->condition "M_BAD_STATE" 'm-bad-state)
 
 (defun signal-condition-from-response (response)
-  (let* ((code (getf response :|errcode|))
-         (error-val (getf response :|error|))
-         (args (getf response :|retry_after_ms|))
-         (condition (get-string->condition code)))
-    (error condition :api-error-code code
-                     :api-error-error error-val
-                     :api-error-args args)))
+  (with-hash-keys (|errcode| |error| |retry_after_ms|)
+      response 
+    (error (get-string->condition |errcode|)
+           :api-error-code |errcode|
+           :api-error-error |error|
+           :api-error-args |retry_after_ms|)))
 

@@ -1,6 +1,5 @@
 (in-package #:lunamech-matrix-api/v2)
 
-
 (defun password-login (connection)
   (with-accessors ((username username)
                    (password password)
@@ -18,7 +17,7 @@
                                :initial-device-display-name username
                                :password password)))
       (with-locked-connection (connection)
-        (destructuring-bind (&key |access_token| |device_id| |user_id| &allow-other-keys)
+        (with-hash-keys (|access_token| |device_id| |user_id|)
             (call-api call)
           (when |device_id|
             (setf device-id |device_id|))
@@ -133,8 +132,8 @@
 (defun members-in-room%ids (connection room-id)
   (let ((members (members-in-room connection room-id)))
     (mapcar (lambda (ele)
-              (getf ele :|user_id|))
-            (getf members :|chunk|))))
+              (gethash "user_id" ele))
+            (gethash "chunk" members))))
 
 (defun members-in-room-ids (connection room-id)
   "Gets the members id's of ROOM-ID."
@@ -155,8 +154,7 @@
   "Uploads image from PATH to to ROOM-ID. Keys are passed to 
 object%event/m-room-message/m-image"
   (let* ((file (alexandria:read-file-into-byte-vector path))
-         (url (getf (upload-content connection name content-type file)
-                    :|content_uri|)))
+         (url (gethash "content_uri" (upload-content connection name content-type file))))
     (send-message-event-to-room connection room-id
                                 (apply #'object%event/m-room-message/m-image
                                        (append (list :body name
@@ -167,8 +165,7 @@ object%event/m-room-message/m-image"
                                  &rest keys &key &allow-other-keys)
   "Uploads BYTES from BYTES to to ROOM-ID. Keys are passed to 
 object%event/m-room-message/m-image"
-  (let ((url (getf (upload-content connection name content-type bytes)
-                   :|content_uri|)))
+  (let ((url (gethash "content_uri" (upload-content connection name content-type bytes))))
     (send-message-event-to-room connection room-id
                                 (apply #'object%event/m-room-message/m-image
                                        (append (list :body name

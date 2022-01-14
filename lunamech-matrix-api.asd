@@ -70,7 +70,9 @@
                               :components ((:file "api")))
                              (:module "spaces"
                               :serial t
-                              :components ((:file "api")))
+                              :components ((:file "api")
+                                           (:file "spaces")))
+                             (:file "helpers")
                              (:file "object-helpers")
                              (:file "filters")
                              (:file "integration")

@@ -751,7 +751,8 @@
 
            #:%call-condition-handler
 
-           #:%handler-dex-condition
+           #:%handle-dex-condition
+           
 
            ;;filters
            #:get-filter
@@ -774,4 +775,13 @@
            #:serialize-connection
 
            #:restore-connection
+           ;;helpers
+           #:with-hash-keys
+
+           ;;spaces/spaces.lisp
+           #:spaces-hierarchy
+           #:rooms-in-a-space
+           #:spaces-in-a-space
+           #:invite-to-a-space
+           #:invite-user-to-all-spaces-in-space
            ))

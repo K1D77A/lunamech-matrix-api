@@ -7,11 +7,6 @@ as the interface cannot be changed, although all newly implemented API calls can
 follow a different scheme.
 ||#
 
-
-;;;;this file contains a MOP for webhooks
-
-
-
 (defun url-e (url)
   (do-urlencode:urlencode url))
 
@@ -347,7 +342,8 @@ removed if no value is added."
         (setf (result api)
               (if (do-not-decode-p api)
                   (execute-api-call api fun url header-list)
-                  (jojo:parse (execute-api-call api fun url header-list))))
+                  (jojo:parse (execute-api-call api fun url header-list)
+                              :as :hash-table)))
         (values (result api) api)))))
 
 (defmethod slots-still-missing ((api api))
