@@ -23,7 +23,6 @@ special condition defined in src/classes.lisp and signals."
                         (%call-condition-handler ,condition))))))
          (try-again-restart fun)))))
 
-
 (defgeneric %call-condition-handler (condition)
   (:documentation "Attempts to handle conditions that come about as a consequence of 
 executing an api call."))
@@ -65,10 +64,3 @@ has returned an unknown condition."))
 (defmethod %handle-dex-condition (condition status)
   (signal-condition-from-response
    (jojo:parse (dexador.error:response-body condition))))
-
-
-
-
-
-
-
