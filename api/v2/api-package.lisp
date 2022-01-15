@@ -551,6 +551,8 @@
 
            #:send-event-to-room
 
+           #:send-state-event-to-room
+
            #:redact-event-in-room
 
            #:kick-user-from-room
@@ -715,6 +717,8 @@
            #:object%event/m-room-message/m-text%basic
 
            #:object%event/m-room-message/m-text
+
+           #:object%m-room-name
 
            #:object%image-info
 

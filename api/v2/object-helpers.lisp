@@ -37,6 +37,10 @@
                          ("body" . ,message)))
           "m.room.message"))
 
+(defun object%m-room-name (name)
+  (values (%quick-hash `(("name" . ,name)))
+          "m.room.name"))
+
 (defun object%event/m-room-message/m-text (message formatted-body)
   (values (%quick-hash `(("msgtype" . "m.text")
                          ("body" . ,message)

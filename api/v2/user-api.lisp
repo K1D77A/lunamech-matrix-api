@@ -77,6 +77,14 @@
                   :event-type event-type
                   :connection connection)))
 
+(defun send-state-event-to-room (connection room-id event-type event)
+  (call-api
+   (make-instance 'events%put-state-event-into-room
+                  :body event 
+                  :room-id room-id
+                  :event-type event-type
+                  :connection connection)))
+
 (defun redact-event-in-room (connection room-id event-id reason)
   (call-api (make-instance 'events%redact-event
                            :reason reason
