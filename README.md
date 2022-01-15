@@ -8,6 +8,8 @@ Currently v2 wraps every call in the client-server spec, the spaces api, every c
 
 # Important notes
 
+## The examples you see for v2 are using Plists, this is no longer the case. You can use the macro with-hash-keys in place of destructuring-bind.
+
 When using an api call like
 ```lisp
 (make-instance 'rooms%public-rooms/filtered :connection #v13 :include-all-networks nil)
