@@ -63,4 +63,4 @@ has returned an unknown condition."))
 
 (defmethod %handle-dex-condition (condition status)
   (signal-condition-from-response
-   (jojo:parse (dexador.error:response-body condition))))
+   (jojo:parse (dexador.error:response-body condition) :as :hash-table)))

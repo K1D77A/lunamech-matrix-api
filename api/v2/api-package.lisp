@@ -784,4 +784,21 @@
            #:spaces-in-a-space
            #:invite-to-a-space
            #:invite-user-to-all-spaces-in-space
+
+           ;;events
+           #:event
+           #:make-event
+           #:m-message
+           #:m-text
+           #:m-image
+           #:m-file
+           #:file-info
+           #:container
+           #:m-direct
+           #:direct-content
+           #:event-content
+           #:m-room-name
+           #:m-presence
+           #:power-level
+           #:power-level%users
            ))
