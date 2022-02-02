@@ -217,11 +217,9 @@ object%event/m-room-message/m-image"
                            :user-id user-id
                            :connection connection)))
 
-
 (defun download-content (connection mxc-address &key (allow-remote "true"))
-  (let* ((mxc-list (str:split ":" mxc-address))
-         (content-id (second mxc-list))
-         (homeserver (second mxc-list)))
+  (multiple-value-bind (homeserver content-id)
+      (destructure-mxc mxc-address)
     (call-api
      (make-instance 'media%get-media
                     :media-id content-id

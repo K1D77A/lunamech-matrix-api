@@ -780,6 +780,7 @@
 
            #:restore-connection
            ;;helpers
+           #:destructure-mxc
            #:with-hash-keys
 
            ;;spaces/spaces.lisp

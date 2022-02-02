@@ -27,10 +27,12 @@
    (url
     :accessor url
     :initarg :url
-    :type string)
+    :type string
+    :documentation "The URL of the matrix server you want to connect to")
    (api
     :accessor api
     :initarg :api
+    :initform "/_matrix/client/r0/"
     :type string)
    (username
     :accessor username
