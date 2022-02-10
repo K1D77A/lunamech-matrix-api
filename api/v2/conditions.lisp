@@ -60,89 +60,63 @@
 (define-condition api-no-connection (api-timeout)
   ())
 
-(define-condition m-forbidden (api-error)
-  ((api-error-description
-    :initform "Forbidden access, e.g. joining a room without permission, failed login.")))
-
-(define-condition m-unknown-token (api-error)
-  ((api-error-description
-    :initform "The access token specified was not recognised.
-An additional response parameter, soft_logout, might be present on the response for 401 HTTP status codes. See the soft logout section for more information.")))
-
-(define-condition m-missing-token (api-error)
-  ((api-error-description
-    :initform
-    "No access token was specified for the request.")))
-
-(define-condition m-bad-json (api-error)
-  ((api-error-description
-    :initform
-    "Request contained valid JSON, but it was malformed in some way, e.g. missing required keys, invalid values for keys.")))
-
-(define-condition m-not-json (api-error)
-  ((api-error-description
-    :initform "Request did not contain valid JSON.")))
-
-(define-condition m-not-found (api-error)
-  ((api-error-description
-    :initform "No resource was found for this request.")))
-
-(define-condition m-limit-exceeded (api-error)
-  ((api-error-description
-    :initform "Too many requests have been sent in a short period of time. Wait a while then try again.")))
-
-(define-condition m-unknown (api-error)
-  ((api-error-description
-    :initform "An unknown error has occurred.")))
-
-(define-condition m-unrecognized (api-error)
-  ((api-error-description
-    :initform "The server did not understand the request.")))
-
-(define-condition m-unauthorized (api-error)
-  ((api-error-description
-    :initform "The request was not correctly authorized. Usually due to login failures.")))
-
-(define-condition m-invalid-param (api-error)
-  ((api-error-description
-    :initform "A parameter is invalid")))
-
-(define-condition m-room-in-use (api-error)
-  ((api-error-description
-    :initform "Attempting to a use a room that already exists")))
-
-(define-condition m-bad-state (api-error)
-  ((api-error-description
-    :initform "The state change requested cannot be performed, such as attempting to unban a user who is not banned")))
-
 (defparameter *string->condition* (make-hash-table :test #'equal))
 
 (defun add-string->condition (string condition-sym)
   (setf (gethash string *string->condition*) condition-sym))
 
 (defun get-string->condition (string)
-  (let ((condition (gethash string *string->condition*)))
-    (unless condition
-      (error (format nil "Condition for ~S not defined" string)))
-    condition))
+  (gethash string *string->condition* 'api-error))
 
-(add-string->condition "M_FORBIDDEN" 'm-forbidden)
-(add-string->condition "M_UNKNOWN_TOKEN" 'm-unknown-token)
-(add-string->condition "M_MISSING_TOKEN" 'm-missing-token)
-(add-string->condition "M_BAD_JSON" 'm-bad-json)
-(add-string->condition "M_NOT_JSON" 'm-not-json)
-(add-string->condition "M_NOT_FOUND" 'm-not-found)
-(add-string->condition "M_LIMIT_EXCEEDED" 'm-limit-exceeded)
-(add-string->condition "M_UNKNOWN" 'm-unknown)
-(add-string->condition "M_UNRECOGNIZED" 'm-unrecognized)
-(add-string->condition "M_UNAUTHORIZED" 'm-unauthorized)
-(add-string->condition "M_INVALID_PARAM" 'm-invalid-param)
-(add-string->condition "M_ROOM_IN_USE" 'm-room-in-use)
-(add-string->condition "M_BAD_STATE" 'm-bad-state)
+(defmacro new-matrix-condition (name &body description)
+  `(progn (define-condition ,name (api-error)
+            ((api-error-description :initform ,@description)))
+          (add-string->condition ,(string-upcase (str:snake-case (string-upcase name)))
+                                 ',name)))
+
+(new-matrix-condition m-forbidden 
+    "Forbidden access, e.g. joining a room without permission, failed login.")
+
+(new-matrix-condition m-unknown-token 
+  "The access token specified was not recognised.
+An additional response parameter, soft_logout, might be present on the response for 401 HTTP status codes. See the soft logout section for more information.")
+
+(new-matrix-condition m-missing-token 
+  "No access token was specified for the request.")
+
+(new-matrix-condition m-bad-json 
+  "Request contained valid JSON, but it was malformed in some way, e.g. missing required keys, invalid values for keys.")
+
+(new-matrix-condition m-not-json 
+  "Request did not contain valid JSON.")
+
+(new-matrix-condition m-not-found 
+  "No resource was found for this request.")
+
+(new-matrix-condition m-limit-exceeded 
+  "Too many requests have been sent in a short period of time. Wait a while then try again.")
+
+(new-matrix-condition m-unknown 
+  "An unknown error has occurred.")
+
+(new-matrix-condition m-unrecognized 
+  "The server did not understand the request.")
+
+(new-matrix-condition m-unauthorized 
+  "The request was not correctly authorized. Usually due to login failures.")
+
+(new-matrix-condition m-invalid-param 
+  "A parameter is invalid")
+
+(new-matrix-condition m-room-in-use 
+  "Attempting to a use a room that already exists")
+
+(new-matrix-condition m-bad-state 
+  "The state change requested cannot be performed, such as attempting to unban a user who is not banned")
 
 (defun signal-condition-from-response (response)
   (with-hash-keys (|errcode| |error| |retry_after_ms|)
-      response 
+      response
     (error (get-string->condition |errcode|)
            :api-error-code |errcode|
            :api-error-error |error|

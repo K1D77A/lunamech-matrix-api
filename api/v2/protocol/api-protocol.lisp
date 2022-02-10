@@ -104,7 +104,8 @@ removed if no value is added."
                                             (if encoder?
                                                 (etypecase val
                                                   (string (funcall encoder? val))
-                                                  (number val))
+                                                  (number val)
+                                                  (null "false"))
                                                 val))))))
                                    ',syms-assoc-encoders)))
                             (format nil "~{~A~^/~}" strings)))))

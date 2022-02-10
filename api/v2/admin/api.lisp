@@ -461,59 +461,99 @@ Note that Synapse requires at least one message in each room, so it will never d
             (:rate-limited-p nil))
 
 (defapi%delete admin%delete-room ("rooms/:room-id")
-               "The Delete Room admin API allows server admins to remove rooms from server and block these rooms."
-               ((room-id
-                 :accessor room-id
-                 :initarg :room-id
-                 :in-url-p t
-                 :requiredp t)
-                (new-room-user-id
-                 :accessor new-room-user-id
-                 :initarg :new-room-user-id
-                 :requiredp nil)
-                (room-name
-                 :accessor room-name
-                 :initarg :room-name
-                 :requiredp nil)
-                (message
-                 :accessor message 
-                 :initarg :message
-                 :initform "Room shutdown by admin."
-                 :requiredp nil)
-                (block-room
-                 :accessor block-room
-                 :initarg block-room
-                 :name->json "block"
-                 :initform nil
-                 :requiredp nil)
-                (purge
-                 :accessor purge
-                 :initarg :purge
-                 :initform t
-                 :requiredp nil)
-                (force-purge
-                 :accessor force-purge
-                 :initarg :force-purge
-                 :initform nil
-                 :requiredp nil))
-               (:api "/_synapse/admin/v1/")
-               (:requires-auth-p t)
-               (:rate-limited-p nil))
+  "The Delete Room admin API allows server admins to remove rooms from server and block these rooms."
+  ((room-id
+    :accessor room-id
+    :initarg :room-id
+    :in-url-p t
+    :requiredp t)
+   (new-room-user-id
+    :accessor new-room-user-id
+    :initarg :new-room-user-id
+    :requiredp nil)
+   (room-name
+    :accessor room-name
+    :initarg :room-name
+    :requiredp nil)
+   (message
+    :accessor message 
+    :initarg :message
+    :initform "Room shutdown by admin."
+    :requiredp nil)
+   (block-room
+    :accessor block-room
+    :initarg block-room
+    :name->json "block"
+    :initform "false"
+    :requiredp nil)
+   (purge
+    :accessor purge
+    :initarg :purge
+    :initform t
+    :requiredp nil)
+   (force-purge
+    :accessor force-purge
+    :initarg :force-purge
+    :initform "false"
+    :requiredp nil))
+  (:api "/_synapse/admin/v1/")
+  (:requires-auth-p t)
+  (:rate-limited-p nil))
+
+(defapi%delete admin%delete-room/v2 ("rooms/:room-id")
+  "The Delete Room admin API allows server admins to remove rooms from server and block these rooms. ASYNC"
+  ((room-id
+    :accessor room-id
+    :initarg :room-id
+    :in-url-p t
+    :requiredp t)
+   (new-room-user-id
+    :accessor new-room-user-id
+    :initarg :new-room-user-id
+    :requiredp nil)
+   (room-name
+    :accessor room-name
+    :initarg :room-name
+    :requiredp nil)
+   (message
+    :accessor message 
+    :initarg :message
+    :initform "Room shutdown by admin."
+    :requiredp nil)
+   (block-room
+    :accessor block-room
+    :initarg block-room
+    :name->json "block"
+    :initform "false"
+    :requiredp nil)
+   (purge
+    :accessor purge
+    :initarg :purge
+    :initform t
+    :requiredp nil)
+   (force-purge
+    :accessor force-purge
+    :initarg :force-purge
+    :initform "false"
+    :requiredp nil))
+  (:api "/_synapse/admin/v2/")
+  (:requires-auth-p t)
+  (:rate-limited-p nil))
 
 (defapi%post admin%make-user-admin-in-room ("join/:room-id-or-alias/make_room_admin")
-             "Grants another user the highest power available to a local user who is in the room. If the user is not in the room, and it is not publicly joinable, then invite the user."
-             ((user-id
-               :accessor user-id
-               :initarg :user-id
-               :requiredp nil)
-              (room-id-or-alias
-               :accessor room-id-or-alias
-               :initarg :room-id-or-alias
-               :in-url-p t
-               :requiredp t))
-             (:api "/_synapse/admin/v1/")
-             (:requires-auth-p t)
-             (:rate-limited-p nil))
+  "Grants another user the highest power available to a local user who is in the room. If the user is not in the room, and it is not publicly joinable, then invite the user."
+  ((user-id
+    :accessor user-id
+    :initarg :user-id
+    :requiredp nil)
+   (room-id-or-alias
+    :accessor room-id-or-alias
+    :initarg :room-id-or-alias
+    :in-url-p t
+    :requiredp t))
+  (:api "/_synapse/admin/v1/")
+  (:requires-auth-p t)
+  (:rate-limited-p nil))
 
 (defapi%get admin%get-room-forward-extremities
     ("join/:room-id-or-alias/forward_extremities")

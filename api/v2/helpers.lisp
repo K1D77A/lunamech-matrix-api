@@ -10,7 +10,7 @@ each of these KEYS has to have a non nil value otherwise signals 'malformed-json
        (locally ,@body))))
 
 (defun destructure-mxc (mxc)
-  "mxc://<server-name>/<media-id>"
+  "mxc://<server-name>/<media-id> -> server-name media-id"
   (let ((split (str:split "/" mxc :omit-nulls t)))
     (destructuring-bind (a server content)
         split

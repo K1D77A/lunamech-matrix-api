@@ -32,7 +32,7 @@
    (api
     :accessor api
     :initarg :api
-    :initform "/_matrix/client/r0/"
+    :initform "/_matrix/client/v3/"
     :type string)
    (username
     :accessor username

@@ -444,6 +444,7 @@
            #:admin%get-room-state
 
            #:admin%delete-room
+           #:admin%delete-room/v2
            #:new-room-user-id
            #:room-name
            #:block-room
