@@ -134,22 +134,22 @@ removed if no value is added."
 (defmacro defapi%post (name (endpoint) docstring slots &rest class-options)
   `(defapi ,name (,endpoint) ,docstring ,slots
            ,@(append class-options
-                     '((:request-fun dexador:post)))))
+                     '((:request-fun :post)))))
 
 (defmacro defapi%get (name (endpoint) docstring slots &rest class-options)
   `(defapi ,name (,endpoint) ,docstring ,slots
            ,@(append class-options
-                     '((:request-fun dexador:get)))))
+                     '((:request-fun :get)))))
 
 (defmacro defapi%put (name (endpoint) docstring slots &rest class-options)
   `(defapi ,name (,endpoint) ,docstring ,slots
            ,@(append class-options
-                     '((:request-fun dexador:put)))))
+                     '((:request-fun :put)))))
 
 (defmacro defapi%delete (name (endpoint) docstring slots &rest class-options)
   `(defapi ,name (,endpoint) ,docstring ,slots
            ,@(append class-options
-                     '((:request-fun dexador:delete)))))
+                     '((:request-fun :delete)))))
 
 (defmethod validate-slot-for-sending ((api api) slot)
   (with-accessors ((requiredp requiredp))
@@ -374,7 +374,7 @@ will be converted to JSON. Uses HASH for this."
 
 (defmethod execute-api-call ((api api) fun url args-plist)
   (with-captured-dex-error
-    (apply fun url args-plist)))
+    (apply #'dex:request url (append (list :method fun) args-plist))))
 
 (defmethod print-object ((obj api) stream)
   (print-unreadable-object (obj stream :type t :identity t)

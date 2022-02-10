@@ -484,17 +484,14 @@ Note that Synapse requires at least one message in each room, so it will never d
                  :accessor block-room
                  :initarg :block-room
                  :name->json "block"
-                 :initform nil
                  :requiredp nil)
                 (purge
                  :accessor purge
                  :initarg :purge
-                 :initform t
                  :requiredp nil)
                 (force-purge
                  :accessor force-purge
                  :initarg :force-purge
-                 :initform nil
                  :requiredp nil))
                (:api "/_synapse/admin/v1/")
                (:requires-auth-p t)
@@ -524,23 +521,20 @@ Note that Synapse requires at least one message in each room, so it will never d
                  :accessor block-room
                  :initarg :block-room
                  :name->json "block"
-                 :initform nil
                  :requiredp nil)
                 (purge
                  :accessor purge
                  :initarg :purge
-                 :initform t
                  :requiredp nil)
                 (force-purge
                  :accessor force-purge
                  :initarg :force-purge
-                 :initform nil
                  :requiredp nil))
                (:api "/_synapse/admin/v2/")
                (:requires-auth-p t)
                (:rate-limited-p nil))
 
-(defapi%post admin%make-user-admin-in-room ("join/:room-id-or-alias/make_room_admin")
+(defapi%post admin%make-user-admin-in-room ("rooms/:room-id-or-alias/make_room_admin")
              "Grants another user the highest power available to a local user who is in the room. If the user is not in the room, and it is not publicly joinable, then invite the user."
              ((user-id
                :accessor user-id
@@ -556,7 +550,7 @@ Note that Synapse requires at least one message in each room, so it will never d
              (:rate-limited-p nil))
 
 (defapi%get admin%get-room-forward-extremities
-    ("join/:room-id-or-alias/forward_extremities")
+    ("rooms/:room-id-or-alias/forward_extremities")
     "To check the status of forward extremities for a room:"            
     ((room-id-or-alias
       :accessor room-id-or-alias
@@ -568,7 +562,7 @@ Note that Synapse requires at least one message in each room, so it will never d
     (:rate-limited-p nil))
 
 (defapi%delete admin%delete-room-forward-extremities
-    ("join/:room-id-or-alias/forward_extremities")
+    ("rooms/:room-id-or-alias/forward_extremities")
     "WARNING: Please ensure you know what you're doing and have read the related issue #1760. Under no situations should this API be executed as an automated maintenance task!"
     ((room-id-or-alias
       :accessor room-id-or-alias
@@ -579,7 +573,7 @@ Note that Synapse requires at least one message in each room, so it will never d
     (:requires-auth-p t)
     (:rate-limited-p nil))
 
-(defapi%get admin%get-event-context ("join/:room-id/context/:event-id")
+(defapi%get admin%get-event-context ("rooms/:room-id/context/:event-id")
             "This API lets a client find the context of an event. This is designed primarily to investigate abuse reports."
             ((room-id
               :accessor room-id

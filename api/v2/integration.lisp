@@ -20,12 +20,12 @@
 (defmacro defintegration-api%post (name (endpoint) docstring slots &rest class-options)
   `(defintegration-api ,name (,endpoint) ,docstring ,slots
                        ,@(append class-options
-                                 '((:request-fun dexador:post)))))
+                                 '((:request-fun :post)))))
 
 (defmacro defintegration-api%get (name (endpoint) docstring slots &rest class-options)
   `(defintegration-api ,name (,endpoint) ,docstring ,slots
                        ,@(append class-options
-                                 '((:request-fun dexador:get)))))
+                                 '((:request-fun :get)))))
 
 (defintegration-api%post integration%register ("/_matrix/integrations/v1/account/register")
                          "Exchanges an OpenID object for a token which can be used to authorize future requests to the manager."
