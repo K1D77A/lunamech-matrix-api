@@ -137,7 +137,7 @@
               (logout-devices
                :accessor logout-devices
                :initarg :logout-devices
-               :initform "true")
+               :initform t)
               (auth
                :accessor auth
                :initarg :auth

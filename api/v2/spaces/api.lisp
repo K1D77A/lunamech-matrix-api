@@ -10,8 +10,8 @@
              (suggested-only
               :accessor suggested-only
               :initarg :suggested-only
-              :initform "false"
-              :one-of ("true" "false")
+              :initform f
+              :one-of (t nil)
               :requiredp nil 
               :query-param-p t)
              (limit

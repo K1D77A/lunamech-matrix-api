@@ -150,7 +150,7 @@
               :accessor allow-remote
               :initarg :allow-remote
               :query-param-p t
-              :initform "true"))
+              :initform t))
             (:api "/_matrix/media/r0/")
             (:do-not-decode-p t)
             (:rate-limited-p t)
@@ -177,7 +177,7 @@
               :accessor allow-remote
               :initarg :allow-remote
               :query-param-p t
-              :initform "true"))
+              :initform t))
             (:api "/_matrix/media/r0/")
             (:do-not-decode-p t)            
             (:rate-limited-p t)
@@ -587,7 +587,7 @@
               :accessor enabled
               :initarg :enabled
               :requiredp t
-              :initform "true"))
+              :initform t))
             (:rate-limited-p nil)
             (:requires-auth-p t))
 

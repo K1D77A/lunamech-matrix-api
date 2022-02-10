@@ -8,8 +8,10 @@
                #:drakma
                #:jonathan
                #:str
-               #:plump 
+               #:plump
+               #:quri
                #:cl-json
+               #:shasht
                #:reader
                #:closer-mop
                #:do-urlencode)

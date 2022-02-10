@@ -15,7 +15,7 @@
              (full-state
               :accessor full-state
               :initarg :full-state
-              :initform "false"
+              :initform nil
               :query-param-p t
               :requiredp nil)
              (set-presence

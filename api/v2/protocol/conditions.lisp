@@ -35,7 +35,7 @@ with the connection object."))
 (define-condition missing-required-data (api-protocol-condition)
   ((slot
     :accessor slot
-    :initarg slot
+    :initarg :slot
     :documentation "The slot that is missing the data."))
   (:documentation "Signalled when you have tried to execute an api call but you 
 are missing data from a required slot."))

@@ -22,9 +22,6 @@
                                       c2mop:standard-effective-slot-definition)
   ())
 
-
-
-
 (defclass api-slot (c2mop:slot-definition)
   ((name
     :accessor name
@@ -58,7 +55,7 @@
   ((encoder
     :accessor encoder
     :initarg :encoder
-    :initform #'url-e
+    :initform #'quri:url-encode
     :documentation "if this slot is being encoded into the URL then uses this function.")
    (in-url-p
     :accessor in-url-p

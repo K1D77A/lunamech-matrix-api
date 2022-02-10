@@ -8,7 +8,7 @@ follow a different scheme.
 ||#
 
 (defun url-e (url)
-  (do-urlencode:urlencode url))
+  (quri:url-encode url))
 
 (defclass api ()
   ((connection
@@ -66,6 +66,13 @@ START should be a string of len 1."
                 string))
           list))
 
+(defun grab-slot-value (class object effective)
+  (handler-case
+      (c2mop:slot-value-using-class class object effective)
+    (unbound-slot ()
+      (error 'missing-required-data
+             :slot effective))))
+
 (defun compose-string-into-lambda (class string)
   "Takes a string like 'foo/:bar/quux and returns a function with N arguments where 
 N is the number of words prefixed with :, so in the example it would be a function with 
@@ -97,15 +104,12 @@ removed if no value is added."
                                        (list
                                         (destructuring-bind (&key effective direct)
                                             e 
-                                          (let ((val
-                                                  (c2mop:slot-value-using-class
-                                                   ,class api effective))
+                                          (let ((val (grab-slot-value ,class api effective))
                                                 (encoder? (encoder direct)))
                                             (if encoder?
                                                 (etypecase val
                                                   (string (funcall encoder? val))
-                                                  (number val)
-                                                  (null "false"))
+                                                  (number val))
                                                 val))))))
                                    ',syms-assoc-encoders)))
                             (format nil "~{~A~^/~}" strings)))))
@@ -128,16 +132,19 @@ removed if no value is added."
                     (compose-string-into-lambda class (in-list endpoint)))))))
 
 (defmacro defapi%post (name (endpoint) docstring slots &rest class-options)
-  `(defapi ,name (,endpoint) ,docstring ,slots ,@(append class-options
-                                                         '((:request-fun dexador:post)))))
+  `(defapi ,name (,endpoint) ,docstring ,slots
+           ,@(append class-options
+                     '((:request-fun dexador:post)))))
 
 (defmacro defapi%get (name (endpoint) docstring slots &rest class-options)
-  `(defapi ,name (,endpoint)  ,docstring ,slots ,@(append class-options
-                                                          '((:request-fun dexador:get)))))
+  `(defapi ,name (,endpoint) ,docstring ,slots
+           ,@(append class-options
+                     '((:request-fun dexador:get)))))
 
 (defmacro defapi%put (name (endpoint) docstring slots &rest class-options)
-  `(defapi ,name (,endpoint) ,docstring ,slots ,@(append class-options
-                                                         '((:request-fun dexador:put)))))
+  `(defapi ,name (,endpoint) ,docstring ,slots
+           ,@(append class-options
+                     '((:request-fun dexador:put)))))
 
 (defmacro defapi%delete (name (endpoint) docstring slots &rest class-options)
   `(defapi ,name (,endpoint) ,docstring ,slots
@@ -166,26 +173,33 @@ removed if no value is added."
         slots-to-send))
 
 (defmethod remove-unbound-slots ((api api) slots-to-send)
-  (remove-if-not (lambda (slot) (slot-boundp api (c2mop:slot-definition-name slot)))
+  (remove-if-not (lambda (slot)
+                   (slot-boundp api (c2mop:slot-definition-name slot)))
                  slots-to-send))
 
 (defmethod slots-to-send-and-validated ((api api))
   (remove-unbound-slots api (validate-slots-for-sending api (slots-to-send api))))
 
-(defmethod slot->json ((api api) slot)
-  (let ((name (c2mop:slot-definition-name slot)))
-    (cl-json:encode-object-member 
-     (or (and (slot-boundp slot 'name->json) (slot-value slot 'name->json))
-         (str:snake-case (string name)))
-     (slot-value api name))))
+(defun determine-slot-name (api-slot)
+  "If 'name->json is bound within API-SLOT then uses that for the name rather than 
+converting the #'c2mop:slot-definition-name to snake-case."
+  (or (and (slot-boundp api-slot 'name->json)
+           (slot-value api-slot 'name->json))
+      (str:snake-case (string (c2mop:slot-definition-name api-slot)))))
 
-(defmethod to-json ((api api))
+(defun slot->json (api hash slot)
+  "Converts a slot from within an instance of API into a value that
+will be converted to JSON. Uses HASH for this."
+  (let ((name (determine-slot-name slot)))
+    (setf (gethash name hash) 
+          (slot-value api (c2mop:slot-definition-name slot)))))
+
+(defun to-json (api)
+  "Converts an instance of API into a JSON string. Currently uses SHASHT."
   (let* ((slots (slots-to-send-and-validated api))
-         (stream (make-string-output-stream))
-         (cl-json:*json-output* stream))
-    (cl-json:with-object ()
-      (mapc (lambda (s) (slot->json api s)) slots))
-    (get-output-stream-string stream)))
+         (hash (make-hash-table :test #'equal)))
+    (mapc (lambda (s) (slot->json api hash s)) slots)
+    (shasht:write-json hash nil)))
 
 (defun in-list (e)
   (if (listp e)
@@ -264,7 +278,7 @@ removed if no value is added."
              :message "You have declared a slot special but it is not bound..."))
     (if (eql special-slot 'bytes)
         (slot-value api special-slot)
-        (jojo:to-json (slot-value api special-slot)))))
+        (shasht:write-json (slot-value api special-slot) nil))))
 
 (defmethod generate-body%normal ((api api))
   (to-json api))
@@ -279,15 +293,15 @@ removed if no value is added."
 
 (defmethod generate-header-list ((api api) fun content)
   (let ((auth (generate-authorization-headers api)))
-    `(:headers ,auth :content ,content :use-connection-pool nil)))
+    `(:headers ,auth :content ,content)))
 
 (defmethod generate-header-list ((api api) (fun (eql 'dexador:get)) content)
   (let ((auth (generate-authorization-headers api)))
-    `(:headers ,auth :use-connection-pool nil)))
+    `(:headers ,auth)))
 
 (defmethod generate-header-list ((api api) (fun (eql 'dexador:delete)) content)
   (let ((auth (generate-authorization-headers api)))
-    `(:headers ,auth :use-connection-pool nil)))
+    `(:headers ,auth)))
 
 (defmethod all-query-param-slots (slots)
   (remove-if-not #'query-param-p slots))
@@ -308,9 +322,10 @@ removed if no value is added."
               (correct-encode (slot-value api name))))))
 
 (defmethod correct-encode (value)
+  "Correctly encode VALUE based on whether it is a string or a symbol."
   (typecase value
-    (string (url-e value))
-    (symbol (url-e (symbol-name value)))
+    (string (quri:url-encode value))
+    (symbol (quri:url-encode (symbol-name value)))
     (otherwise value)))
 
 (defmethod query-param-slots->string ((api api) slots)
@@ -318,12 +333,15 @@ removed if no value is added."
     (format nil "?~{~A~^&~}" strings)))
 
 (defmethod generate-url ((api api))
-  (let ((end (funcall (string-constructor api) api))
-        (query-slots (bound-query-param-slots api)))
-    (concatenate 'string (url (connection api)) (api api) end
-                 (if query-slots
-                     (query-param-slots->string api query-slots)
-                     ""))))
+  (handler-case 
+      (let ((end (funcall (string-constructor api) api))
+            (query-slots (bound-query-param-slots api)))
+        (concatenate 'string (url (connection api)) (api api) end
+                     (if query-slots
+                         (query-param-slots->string api query-slots)
+                         "")))
+    (missing-required-data (c)
+      (format nil "MISSING-REQUIRED-DATA: ~A" (c2mop:slot-definition-name (slot c))))))
 
 (defmethod call-api ((api api))
   (symbol-macrolet ((fun (request-fun api))
