@@ -10,12 +10,11 @@
       connection 
     (let ((call (make-instance 'login-connection 
                                :connection connection
-                               :device-id (if (slot-boundp connection 'device-id)
-                                              device-id
-                                              nil)
                                :identifier (object%identifier-type/m-id-user username)
                                :initial-device-display-name username
                                :password password)))
+      (when (slot-boundp connection 'device-id)
+        (setf (slot-value call 'device-id) device-id))
       (with-locked-connection (connection)
         (with-hash-keys (|access_token| |device_id| |user_id|)
             (call-api call)

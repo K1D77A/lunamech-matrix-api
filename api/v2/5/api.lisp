@@ -12,7 +12,7 @@
                :accessor login-type
                :initarg :login-type
                :initform "m.login.password"
-               :name->json :type
+               :name->json "type"
                :requiredp t
                :one-of '("m.login.password" "m.login.token"))
               (identifier
