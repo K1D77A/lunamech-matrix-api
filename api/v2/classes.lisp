@@ -4,11 +4,12 @@
   ((latest-sync
     :accessor latest-sync
     :initarg :latest-sync
-    :type (or null list))
+    :type (or null list hash-table))
    (next-batch
     :accessor next-batch 
     :initarg :next-batch 
-    :type (or null string))))
+    :type (or null string)))
+  (:documentation "A convenient way of storing the latest sync"))
 
 (defun %ql (name)
   (cons name (bt:make-lock)))
@@ -33,25 +34,31 @@
     :accessor api
     :initarg :api
     :initform "/_matrix/client/v3/"
-    :type string)
+    :type string
+    :documentation "Probably best not touch this but this is prefixed to each 
+request unless the API itself suggests otherwise.")
    (username
     :accessor username
     :initarg :username
-    :type string)
+    :type string
+    :documentation "The username like 'lunamech'")
    (txn
     :accessor txn
     :initarg :txn
     :initform 0 
     :type fixnum
-    :documentation "An auto incrementing Txn id")
+    :documentation "An auto incrementing Txn id. This is automatically added to each 
+api call that accepts a TXN.")
    (user-id
     :accessor user-id
     :initarg :user-id
-    :type string)
+    :type string
+    :documentation "The id like @lunamech:matrix.org")
    (password
     :accessor password
     :type string
-    :initarg :password)
+    :initarg :password
+    :documentation "Your users password login.")
    (auth
     :accessor auth
     :type auth
@@ -68,26 +75,12 @@
    (device-id
     :accessor device-id
     :initarg :device-id
-    :type string)))
+    :type string))
+  (:documentation "This object is passed to all api calls."))
 
 (defmacro with-locked-connection ((connection) &body body)
   `(bt:with-recursive-lock-held ((con-lock ,connection))
      (locally ,@body)))
-
-;; (slot-locks
-;;  :reader slot-locks
-;;  :initarg :slot-locks
-;;  :initform `(,(%ql 'logged-in-p),(%ql 'filters) ,(%ql 'url),(%ql 'api),(%ql 'username)
-;;              ,(%ql 'txn),(%ql 'user-id),(%ql 'password) ,(%ql 'auth) ,(%ql 'encryption)
-;;              ,(%ql 'encryption) ,(%ql 'device-id))
-;;  :documentation "A list of the locks for each slot.")))
-
-;; (defmethod c2mop:slot-value-using-class :around ((class connection) object slot)
-;;   (let* ((name (c2mop:slot-definition-name slot))
-;;          (lock (cdr (assoc name (slot-locks object)))))
-;;     (print "locking")
-;;     (bt:with-lock-held (lock)
-;;       (call-next-method))))
 
 (defmethod print-object ((connection connection) stream)
   (print-unreadable-object (connection stream :type t :identity t)

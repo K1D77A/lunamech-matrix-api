@@ -1,6 +1,8 @@
 (in-package #:lunamech-matrix-api/v2)
 
 (defun password-login (connection)
+  "Given a well formed CONNECTION instance attempts to use 'login-connection to 
+log the CONNECTION into their api."
   (with-accessors ((username username)
                    (password password)
                    (user-id user-id)
@@ -26,6 +28,7 @@
     connection))
 
 (defun logout (connection)
+  "Logs the CONNECTION out."
   (with-accessors ((logged-in-p logged-in-p)
                    (auth auth))
       connection
@@ -38,37 +41,45 @@
     connection))
 
 (defun public-rooms (connection &rest rest &key &allow-other-keys)
+  "Lists the public rooms for CONNECTION. Uses 'rooms%public-rooms."
   (call-api (apply #'make-instance 'rooms%public-rooms
                    (append (list :connection connection)
                            rest))))
 
 (defun get-room-state (connection room-id &rest rest &key &allow-other-keys)
+  "Grabs the room-state for ROOM-ID using CONNECTION. Uses 'events%get-state-events-in-room."
   (call-api (apply #'make-instance 'events%get-state-events-in-room
                    (append (list :connection connection
                                  :room-id room-id)
                            rest))))
 
 (defun join-room (connection room-id)
-  "Makes CONNECTION joined the room denoted by ROOM-ID. Assuming it can."
+  "Makes CONNECTION joined the room denoted by ROOM-ID. Assuming it can. 
+Uses 'rooms%join-a-room."
   (call-api (make-instance 'rooms%join-a-room :room-id room-id :connection connection)))
 
 (defun leave-room (connection room-id)
-  "Makes CONNECTION leave the room denoted by ROOM-ID."
+  "Makes CONNECTION leave the room denoted by ROOM-ID. Uses 'rooms%leave-a-room."
   (call-api (make-instance 'rooms%leave-a-room :room-id room-id :connection connection)))
 
 (defun joined-rooms (connection)
-  "Returns the rooms that CONNECTION is within."
+  "Returns the rooms that CONNECTION is within. Uses 'rooms%my-joined-rooms"
   (call-api (make-instance 'rooms%my-joined-rooms :connection connection)))
 
 (defun send-message-to-room (connection room-id message)
+  "Sends a MESSAGE to ROOM-ID using CONNECTION. 
+Uses object%event/m-room.message/m-text%basic and #'send-event-to-room."
   (multiple-value-bind (hash type)
       (object%event/m-room-message/m-text%basic message)
     (send-event-to-room connection room-id type hash)))
 
 (defun send-message-event-to-room (connection room-id message-event)
+  "Sends MESSAGE-EVENT to ROOM-ID using CONNECTION. Uses #'send-event-to-room."
   (send-event-to-room connection room-id "m.room.message" message-event))
 
 (defun send-event-to-room (connection room-id event-type event)
+  "Sends EVENT of EVENT-TYPE to ROOM-ID using CONNECTION. 
+Uses 'events%put-message-event-into-room."
   (call-api
    (make-instance 'events%put-message-event-into-room
                   :body event 
@@ -77,6 +88,8 @@
                   :connection connection)))
 
 (defun send-state-event-to-room (connection room-id event-type event)
+  "Sends state EVENT of EVENT-TYPE to ROOM-ID using CONNECTION. 
+Uses 'events%put-state-event-into-room."
   (call-api
    (make-instance 'events%put-state-event-into-room
                   :body event 
@@ -85,6 +98,8 @@
                   :connection connection)))
 
 (defun redact-event-in-room (connection room-id event-id reason)
+  "Redacts EVENT-ID from ROOM-ID using CONNECTION. Provide a reason with REASON. 
+Uses 'events%redact-event."
   (call-api (make-instance 'events%redact-event
                            :reason reason
                            :room-id room-id

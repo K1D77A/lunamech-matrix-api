@@ -719,6 +719,8 @@
 
            #:object%event/m-room-message/m-text
 
+           #:object%server-acl
+
            #:object%m-room-name
 
            #:object%image-info

@@ -106,4 +106,7 @@
   (apply #'object%state-filter keys))
 
 
-
+(defun object%server-acl (&key (allow :ne)(allow-ip-literals :ne) (deny :ne))
+  (values (%quick-hash `(("allow" . ,allow) ("allow_ip_literals" . ,allow-ip-literals)
+                         ("deny" . ,deny)))
+          "m.room.server_acl"))
