@@ -27,7 +27,7 @@
              (timeout
               :accessor timeout
               :initarg :timeout
-              :initform 0
+              :initform 100
               :query-param-p t
               :requiredp nil))
             (:rate-limited-p nil)
