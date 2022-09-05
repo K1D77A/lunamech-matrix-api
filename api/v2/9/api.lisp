@@ -31,7 +31,8 @@
               :query-param-p t
               :requiredp nil))
             (:rate-limited-p nil)
-            (:requires-auth-p t))
+            (:requires-auth-p t)
+            (:api "/_matrix/client/v3/"))
 
 (defapi%get events%get-from-id ("rooms/:room-id/event/:event-id")
             "Get a single event based on roomId/eventId. You must have permission to retrieve this event e.g. by being a member in the room for this event."

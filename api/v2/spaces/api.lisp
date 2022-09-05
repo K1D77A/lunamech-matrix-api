@@ -29,7 +29,7 @@
               :initarg :from 
               :query-param-p t
               :requiredp nil))
-            (:api "/_matrix/client/unstable/org.matrix.msc2946/")
+            (:api "/_matrix/client/v1/")
             (:requires-auth-p t)
             (:rate-limited-p t))
 
