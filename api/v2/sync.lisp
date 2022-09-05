@@ -3,21 +3,23 @@
 
 (defun sync (connection &rest keys &key &allow-other-keys)
   "Gets the latest sync object from the server using CONNECTION."
-  (with-accessors ((status status))
-      connection 
-    (let ((call (apply #'make-instance 'sync
-                       (append (list :connection connection)
-                               keys))))
-      (when (slot-boundp status 'next-batch)
-        (setf (since call) (next-batch status)))
-      (let ((resp (call-api call)))
-        (when (slot-boundp connection 'encryption)
-          (setf (server-otk (encryption connection))
-                (gethash "signed_curve25519"
-                         (gethash "device_one_time_keys_count" resp))))
-        (setf (latest-sync status) resp
-              (next-batch status) (gethash "next_batch" resp))
-        resp))))
+  (with-accessors ((status status)
+                   (con-lock con-lock))
+      connection
+    (bt:with-lock-held (con-lock)
+      (let ((call (apply #'make-instance 'sync
+                         (append (list :connection connection)
+                                 keys))))
+        (when (slot-boundp status 'next-batch)
+          (setf (since call) (next-batch status)))
+        (let ((resp (call-api call)))
+          (when (slot-boundp connection 'encryption)
+            (setf (server-otk (encryption connection))
+                  (gethash "signed_curve25519"
+                           (gethash "device_one_time_keys_count" resp))))
+          (setf (latest-sync status) resp
+                (next-batch status) (gethash "next_batch" resp))
+          resp)))))
 
 (defun dry-sync (connection &rest keys &key &allow-other-keys)
   (when (slot-boundp (status connection) 'next-batch)
