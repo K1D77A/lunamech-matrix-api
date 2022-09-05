@@ -15,7 +15,6 @@
           (setf (server-otk (encryption connection))
                 (gethash "signed_curve25519"
                          (gethash "device_one_time_keys_count" resp))))
-        (log:info  (gethash "next_batch" resp))
         (setf (latest-sync status) resp
               (next-batch status) (gethash "next_batch" resp))
         resp))))
