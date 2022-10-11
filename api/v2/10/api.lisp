@@ -106,7 +106,8 @@
                :initarg :user-id
                :requiredp t))
              (:rate-limited-p t)
-             (:requires-auth-p t))
+             (:requires-auth-p t)
+             (:api "/_matrix/client/v3/"))
 
 (defapi%post rooms%join-a-room ("rooms/:room-id/join")
              "This API invites a user to participate in a particular room. They do not start participating in the room until they actually join the room."
