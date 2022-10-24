@@ -54,8 +54,8 @@
   (:report
    (lambda (con stream)
      (format stream "HTTP request failed.~%Message: ~A~%Original condition: ~A~%"
-             (api-timeout-message con)
-             (api-timeout-condition con)))))
+             (api-request-failed-message con)
+             (api-request-failed-condition con)))))
 
 (define-condition api-no-connection (api-timeout)
   ())

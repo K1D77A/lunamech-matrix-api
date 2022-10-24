@@ -62,5 +62,12 @@ has returned an unknown condition."))
          :api-error-description "A request was made with a method that is not allowed."))
 
 (defmethod %handle-dex-condition (condition status)
-  (signal-condition-from-response
-   (jojo:parse (dexador.error:response-body condition) :as :hash-table)))
+  (let ((body (dexador.error:response-body condition)))
+    (if (typep body 'simple-string)
+        (signal-condition-from-response (jojo:parse body :as :hash-table))
+        (let* ((status (dexador.error:response-status condition))
+               (message (format nil "Server replied with HTTP status: ~D"
+                                status)))
+          (error 'api-request-failed
+                 :api-request-failed-condition condition
+                 :api-request-failed-message message)))))
