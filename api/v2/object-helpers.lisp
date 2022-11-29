@@ -48,6 +48,18 @@
                          ("formatted_body" . ,formatted-body)))
           "m.room.message"))
 
+(defun object%event/m-room-power_levels (&key (ban :ne) (events :ne) (events-default :ne)
+                                              (invite :ne) (kick :ne) (notifications :ne)
+                                              (redact :ne) (state-default :ne) (users :ne)
+                                              (users-default :ne))
+  (values 
+   (%quick-hash `(("ban" . ,ban) ("events" . ,events)
+                  ("events_default" . ,events-default) ("invite" . ,invite)
+                  ("kick" . ,kick) ("notifications" . ,notifications)
+                  ("redact" . ,redact) ("state_default" . ,state-default)
+                  ("users" . ,users) ("users_default" . ,users-default)))
+   "m.room.power_levels"))
+
 (defun object%image-info (&key (h :ne) (w :ne) (mimetype :ne)
                             (size :ne) (thumbnail-url :ne) (thumbnail-file :ne)
                             (thumbnail-info :ne))
@@ -100,6 +112,10 @@
                  ("types" . ,types)("not_rooms" . ,not-rooms)("rooms" . ,rooms)
                  ("contains_url" . ,contains-url)("lazy_load_members" . ,lazy-load-members)
                  ("include_redundant_members" . ,include-redundant-members))))
+
+
+
+                
 
 (defun object%room-event-filter (&rest keys &key &allow-other-keys)
   "See object%state-filter for options."

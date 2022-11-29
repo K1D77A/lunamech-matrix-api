@@ -719,6 +719,8 @@
 
            #:object%event/m-room-message/m-text
 
+           #:object%event/m-room-power_levels
+
            #:object%server-acl
 
            #:object%m-room-name

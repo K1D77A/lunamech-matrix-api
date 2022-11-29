@@ -19,7 +19,7 @@ log the CONNECTION into their api."
         (setf (slot-value call 'device-id) device-id))
       (with-locked-connection (connection)
         (with-hash-keys (|access_token| |device_id| |user_id|)
-            (call-api call)
+          (call-api call)
           (when |device_id|
             (setf device-id |device_id|))
           (setf auth (make-instance 'auth :token |access_token|)
@@ -42,16 +42,14 @@ log the CONNECTION into their api."
 
 (defun public-rooms (connection &rest rest &key &allow-other-keys)
   "Lists the public rooms for CONNECTION. Uses 'rooms%public-rooms."
-  (call-api (apply #'make-instance 'rooms%public-rooms
-                   (append (list :connection connection)
-                           rest))))
+  (call-api (apply #'make-instance 'rooms%public-rooms (list* :connection connection rest))))
 
 (defun get-room-state (connection room-id &rest rest &key &allow-other-keys)
   "Grabs the room-state for ROOM-ID using CONNECTION. Uses 'events%get-state-events-in-room."
   (call-api (apply #'make-instance 'events%get-state-events-in-room
-                   (append (list :connection connection
-                                 :room-id room-id)
-                           rest))))
+                   (list* :connection connection
+                          :room-id room-id
+                          rest))))
 
 (defun join-room (connection room-id)
   "Makes CONNECTION joined the room denoted by ROOM-ID. Assuming it can. 
@@ -147,9 +145,9 @@ Uses 'events%redact-event."
 (defun members-in-room (connection room-id &rest keys &key &allow-other-keys)
   "Gets the members of ROOM-ID."
   (call-api (apply #'make-instance 'events%get-room-members
-                   (append (list :room-id room-id
-                                 :connection connection)
-                           keys))))
+                   (list* :room-id room-id
+                          :connection connection
+                          keys))))
 
 (defun members-in-room%ids (connection room-id)
   (let ((members (members-in-room connection room-id)))
@@ -179,9 +177,9 @@ object%event/m-room-message/m-image"
          (url (gethash "content_uri" (upload-content connection name content-type file))))
     (send-message-event-to-room connection room-id
                                 (apply #'object%event/m-room-message/m-image
-                                       (append (list :body name
-                                                     :url url)
-                                               keys)))))
+                                       (list* :body name
+                                              :url url
+                                              keys)))))
 
 (defun send-image-bytes-to-room (connection room-id name content-type bytes
                                  &rest keys &key &allow-other-keys)
@@ -190,15 +188,13 @@ object%event/m-room-message/m-image"
   (let ((url (gethash "content_uri" (upload-content connection name content-type bytes))))
     (send-message-event-to-room connection room-id
                                 (apply #'object%event/m-room-message/m-image
-                                       (append (list :body name
-                                                     :url url)
-                                               keys)))))
-
+                                       (list* :body name
+                                              :url url
+                                              keys)))))
 
 (defun messages-in-room (connection room-id &rest keys &key &allow-other-keys)
   (call-api (apply #'make-instance 'events%get-room-messages 
-                   (append (list :connection connection :room-id room-id)
-                           keys))))
+                   (list* :connection connection :room-id room-id keys))))
 
 (defun invite-member-to-room (connection user-id room-id)
   (call-api (make-instance 'rooms%invite-user-to-room
@@ -209,22 +205,22 @@ object%event/m-room-message/m-image"
 (defun create-room (connection name room-alias topic
                     &rest keys &key &allow-other-keys)
   (call-api (apply #'make-instance 'create-room
-                   (append (list :name name :room-alias room-alias
-                                 :topic topic :connection connection
-                                 :preset "public_chat" :visibiilty "public")
-                           keys))))
+                   (list* :name name :room-alias room-alias
+                          :topic topic :connection connection
+                          :preset "public_chat" :visibiilty "public"
+                          keys))))
 
 (defun create-private-room (connection invite 
                             &rest keys &key &allow-other-keys)
   (call-api (apply #'make-instance 'create-room
-                   (append (list 
-                            :connection connection
-                            :invite invite
-                            :is-direct t 
-                            :creation-content
-                            (%quick-hash `(("m.federate" . t)))
-                            :visibility "private" :preset "private_chat")
-                           keys))))
+                   (list* 
+                    :connection connection
+                    :invite invite
+                    :is-direct t 
+                    :creation-content
+                    (%quick-hash `(("m.federate" . t)))
+                    :visibility "private" :preset "private_chat"
+                    keys))))
 
 (defun user-profile-url (connection user-id)
   (call-api (make-instance 'profile%get-avatar-url
