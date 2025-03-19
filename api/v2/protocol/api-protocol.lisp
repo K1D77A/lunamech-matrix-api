@@ -360,9 +360,24 @@ will be converted to JSON. Uses HASH for this."
             (header-list (generate-header-list api fun (generate-body api))))
         (setf (result api)
               (if (do-not-decode-p api)
-                  (execute-api-call api fun url header-list)
-                  (jojo:parse (execute-api-call api fun url header-list)
-                              :as :hash-table)))
+                  (execute-api-call api fun url header-list)                          
+                  (let ((e-count 0))
+                    ;;whatever system we are using for hosting our matrix server
+                    ;;doesn't return a 5XX HTTP status code when the container is unreachable
+                    ;;instead it returns 'no healthy upstream' which is incomplete json..
+                    ;;in this case we will just automatically retry.
+                    (block success 
+                      (tagbody hi
+                         (handler-case
+                             (return-from success
+                               (jojo:parse (execute-api-call api fun url header-list)
+                                           :as :hash-table))
+                           (jonathan.error:<jonathan-error> (c)
+                             (incf e-count)
+                             (format *debug-io* "Json Error: ~A~%Error count: ~D~%~
+                                               Retrying in 5 seconds" c e-count)
+                             (sleep 5)
+                             (go hi))))))))
         (values (result api) api)))))
 
 (defmethod slots-still-missing ((api api))
@@ -374,7 +389,7 @@ will be converted to JSON. Uses HASH for this."
 
 (defmethod execute-api-call ((api api) fun url args-plist)
   (with-captured-dex-error
-    (apply #'dex:request url (append (list :method fun) args-plist))))
+    (apply #'dex:request url (list* :method fun args-plist))))
 
 (defmethod print-object ((obj api) stream)
   (print-unreadable-object (obj stream :type t :identity t)
