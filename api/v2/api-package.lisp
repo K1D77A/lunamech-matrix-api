@@ -718,6 +718,7 @@
            #:object%event/m-room-message/m-text%basic
 
            #:object%event/m-room-message/m-text
+           #:object%event/m-room-message/m-text%reply
 
            #:object%event/m-room-power_levels
 

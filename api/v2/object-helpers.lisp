@@ -48,6 +48,18 @@
                          ("formatted_body" . ,formatted-body)))
           "m.room.message"))
 
+(defun object%event/m-room-message/m-text%reply (message formatted-body event-id)
+  (values (%quick-hash `(("msgtype" . "m.text")
+                         ("body" . ,message)
+                         ("format" . "org.matrix.custom.html")
+                         ("formatted_body" . ,formatted-body)
+                         ("m.relates_to" . 
+                                         ,(%quick-hash
+                                           `(("m.in_reply_to" . ,(%quick-hash
+                                                                  `(("event_id" . ,event-id)))))))))
+          
+          "m.room.message"))
+
 (defun object%event/m-room-power_levels (&key (ban :ne) (events :ne) (events-default :ne)
                                               (invite :ne) (kick :ne) (notifications :ne)
                                               (redact :ne) (state-default :ne) (users :ne)
