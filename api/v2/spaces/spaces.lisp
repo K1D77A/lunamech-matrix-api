@@ -2,9 +2,9 @@
 
 (defun spaces-hierarchy (connection room-id &rest keys)
   (call-api (apply #'make-instance 'spaces%space-hierarchy
-                   (append (list :room-id room-id
-                                 :connection connection)
-                           keys))))
+                   :room-id room-id
+                   :connection connection
+                   keys)))
 
 (defun rooms-in-a-space (connection room-id)
   (let* ((response (spaces-hierarchy connection room-id))

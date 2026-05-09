@@ -539,6 +539,7 @@
            #:public-rooms
 
            #:get-room-state
+           #:get-room-event-type
 
            #:join-room
 

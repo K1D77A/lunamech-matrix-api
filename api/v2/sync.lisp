@@ -6,8 +6,8 @@
   (with-accessors ((status status))                   
       connection
     (let ((call (apply #'make-instance 'sync
-                       (append (list :connection connection)
-                               keys))))
+                       (list* :connection connection
+                              keys))))
       (when (slot-boundp status 'next-batch)
         (setf (since call) (next-batch status)))
       (let ((resp (call-api call)))
@@ -27,8 +27,8 @@
 (defun key-sync (connection filter-key &rest keys &key &allow-other-keys)
   (let ((filter (find filter-key (filters connection) :key #'key :test #'eq)))
     (or filter (error "No key found."))
-    (apply #'sync connection (append (list :filter (id filter))
-                                     keys))))
+    (apply #'sync connection (list* :filter (id filter)
+                                    keys))))
 
 (defun traverse-sync (sync list-of-keys)
   "The default sync that is received and then parsed from the server ends up as one big ol 

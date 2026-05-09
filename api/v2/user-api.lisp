@@ -9,7 +9,7 @@ log the CONNECTION into their api."
                    (device-id device-id)
                    (logged-in-p logged-in-p)
                    (auth auth))
-      connection 
+      connection
     (let ((call (make-instance 'login-connection 
                                :connection connection
                                :identifier (object%identifier-type/m-id-user username)
@@ -47,9 +47,14 @@ log the CONNECTION into their api."
 (defun get-room-state (connection room-id &rest rest &key &allow-other-keys)
   "Grabs the room-state for ROOM-ID using CONNECTION. Uses 'events%get-state-events-in-room."
   (call-api (apply #'make-instance 'events%get-state-events-in-room
-                   (list* :connection connection
-                          :room-id room-id
-                          rest))))
+                    :connection connection
+                    :room-id room-id
+                    rest)))
+
+(defun get-room-event-type (connection room-id event-type-name)
+  (let ((state (get-room-state connection room-id)))
+    (find event-type-name state :test #'string= :key (lambda (a) (gethash "type" a)))))
+    
 
 (defun join-room (connection room-id)
   "Makes CONNECTION joined the room denoted by ROOM-ID. Assuming it can. 
